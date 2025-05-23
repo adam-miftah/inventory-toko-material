@@ -28,8 +28,8 @@ Selamat datang di repository **Inventory Toko Material**! Ini adalah aplikasi we
     * **MySQL:** Database relasional yang andal untuk penyimpanan data.
 * **Frontend:**
     * **Blade Templating Engine:** Sistem templating Laravel untuk UI yang dinamis.
-    * (Opsional, tambahkan jika Anda menggunakan): **Tailwind CSS / Bootstrap:** Untuk desain responsif dan modern.
-    * (Opsional, tambahkan jika Anda menggunakan): **Alpine.js / Livewire / Vue.js / React:** Untuk interaktivitas frontend.
+    * **Tailwind CSS / Bootstrap:** Untuk desain responsif dan modern.
+    * **Alpine.js / Livewire / Vue.js / React:** Untuk interaktivitas frontend.
 
 ---
 
@@ -109,7 +109,7 @@ Project ini dilisensikan di bawah [Lisensi MIT](https://opensource.org/licenses/
 
 Jika Anda memiliki pertanyaan atau masukan, jangan ragu untuk menghubungi:
 
-* **Adam Miftah** - [Email Anda atau Profil LinkedIn/GitHub Anda]
+* **Adam Miftah** - [adammiftah190@gmail.com]
 
 ---
 
