@@ -4,86 +4,108 @@
 
 @section('content')
   <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0">
-      <i class="fas fa-undo-alt text-primary me-2"></i>Daftar Retur Penjualan
-    </h4>
-    <a href="{{ route('penjualan.retur.create') }}" class="btn btn-outline-primary btn-sm">
-      <i class="fas fa-plus-circle me-1"></i> Buat Retur Baru
-    </a>
-    </div>
-
+    {{-- Notifikasi Session --}}
     @if (session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="fas fa-check-circle me-2"></i>
-    {{ session('success') }}
+    <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     @endif
     @if (session('error'))
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="fas fa-exclamation-circle me-2"></i>
-    {{ session('error') }}
+    <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     @endif
 
-    <div class="card border-0 shadow-sm">
+    {{-- Card Utama --}}
+    <div class="card shadow-sm border-0">
+    <div class="card-header bg-white p-3">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">
+      <h4 class="mb-0 fw-bold text-gradient">
+        <i class="fas fa-undo-alt me-2"></i>Daftar Retur Penjualan
+      </h4>
+      <a href="{{ route('penjualan.retur.create') }}" class="btn btn-primary btn-sm text-nowrap">
+        <i class="fas fa-plus-circle me-1"></i> Buat Retur
+      </a>
+      </div>
+      <hr class="my-3">
+      {{-- Kontrol Pencarian untuk DataTables --}}
+      <div class="row align-items-center">
+      <div class="col-md-12">
+        <div class="input-group input-group-sm" style="max-width: 350px; margin-left: auto;">
+        <span class="input-group-text bg-light border-end-0">
+          <i class="fas fa-search text-muted"></i>
+        </span>
+        <input type="text" id="custom-search-input" class="form-control border-start-0"
+          placeholder="Cari nomor retur, faktur, pelanggan...">
+        </div>
+      </div>
+      </div>
+    </div>
+
     <div class="card-body p-0">
       <div class="table-responsive">
-      <table class="table table-hover mb-0" id="sale-returns-table">
+      <table class="table table-hover align-middle mb-0 @if($saleReturns->isEmpty()) is-empty @endif"
+        id="sale-returns-table" style="width:100%">
         <thead class="table-light">
         <tr>
-          <th width="5%">No.</th>
+          <th class="text-center" width="5%">No.</th>
           <th>Nomor Retur</th>
-          <th>Tgl. Retur</th>
-          <th>No. Faktur</th>
+          <th>Tanggal</th>
           <th>Pelanggan</th>
           <th class="text-end">Total Retur</th>
-          <th class="text-end">Refund</th>
           <th>Kasir</th>
-          <th width="15%" class="text-center">Aksi</th>
+          <th class="text-center" width="10%">Aksi</th>
         </tr>
         </thead>
         <tbody>
-        @foreach ($saleReturns as $return)
+        @forelse ($saleReturns as $return)
       <tr>
-        <td class="fw-semibold">{{ $loop->iteration }}</td>
-        <td>{{ $return->return_number }}</td>
-        <td>
-        <span class="text-muted">
-        {{ $return->return_date->format('d M Y') }}
-        </span>
-        <small class="d-block text-muted">{{ $return->return_date->format('H:i') }}</small>
+        <td data-label="No." class="text-center fw-semibold"></td>
+        <td data-label="Nomor Retur">
+        <a href="{{ route('penjualan.retur.show', $return) }}"
+        class="fw-bold text-primary text-decoration-none">{{ $return->return_number }}</a>
+        <small class="d-block text-muted">Faktur: {{ $return->sale->invoice_number ?? 'N/A' }}</small>
         </td>
-        <td>{{ $return->sale ? $return->sale->invoice_number : 'Umum' }}</td>
-        <td>{{ $return->sale ? ($return->sale->customer_name ?? 'Umum') : 'N/A' }}</td>
-        <td class="text-end fw-semibold">Rp {{ number_format($return->total_returned_amount, 0, ',', '.') }}</td>
-        <td class="text-end">
-        <span class="fw-semibold text-{{ $return->refund_amount > 0 ? 'success' : 'secondary' }}">
-        Rp {{ number_format($return->refund_amount ?? 0, 0, ',', '.') }}
-        </span>
+        <td data-label="Tanggal" data-order="{{ $return->return_date->timestamp }}">
+        {{ $return->return_date->isoFormat('DD MMM YY, HH:mm') }}
         </td>
-        <td>{{ $return->user->name }}</td>
-        <td class="text-center">
+        <td data-label="Pelanggan">{{ $return->sale->customer_name ?? 'Umum' }}</td>
+        <td data-label="Total Retur" class="text-end fw-semibold"
+        data-order="{{ $return->total_returned_amount }}">
+        Rp {{ number_format($return->total_returned_amount, 0, ',', '.') }}
+        </td>
+        <td data-label="Kasir">
+        <div class="d-flex align-items-center">
+        <div class="avatar-sm me-2" data-bs-toggle="tooltip" title="{{ $return->user->name }}">
+        {{ substr($return->user->name, 0, 1) }}
+        </div>
+        <span class="d-none d-md-inline">{{ $return->user->name }}</span>
+        </div>
+        </td>
+        <td data-label="Aksi" class="text-center">
         <div class="d-flex justify-content-center gap-2">
         <a href="{{ route('penjualan.retur.show', $return) }}"
         class="btn btn-sm btn-outline-info rounded-circle" data-bs-toggle="tooltip" title="Detail">
         <i class="fas fa-eye"></i>
         </a>
-        <form action="{{ route('penjualan.retur.destroy', $return) }}" method="POST"
-        class="d-inline delete-form">
-        @csrf
-        @method('DELETE')
-        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" data-bs-toggle="tooltip"
-          title="Hapus">
-          <i class="fas fa-trash-alt"></i>
+        <button type="button" class="btn btn-sm btn-outline-danger rounded-circle delete-btn"
+        data-url="{{ route('penjualan.retur.destroy', $return) }}" data-name="{{ $return->return_number }}"
+        data-bs-toggle="tooltip" title="Hapus">
+        <i class="fas fa-trash-alt"></i>
         </button>
-        </form>
         </div>
         </td>
       </tr>
-      @endforeach
+      @empty
+      <tr>
+        <td colspan="7" class="text-center py-5 text-muted">
+        <i class="fas fa-box-open fa-3x mb-3"></i>
+        <p class="mb-0">Belum ada data retur penjualan.</p>
+        </td>
+      </tr>
+      @endforelse
         </tbody>
       </table>
       </div>
@@ -94,49 +116,40 @@
 
 @push('styles')
   <style>
-    .card {
-    border-radius: 0.5rem;
-    overflow: hidden;
-    }
-
-    .table {
-    margin-bottom: 0;
+    .text-gradient {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
     }
 
     .table th {
-    border-top: none;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #6c757d;
     white-space: nowrap;
     }
 
     .table td {
+    padding: 0.9rem 1rem;
     vertical-align: middle;
+    font-size: 0.875rem;
     }
 
-    .badge {
-    font-weight: 500;
-    padding: 0.35em 0.65em;
-    }
-
-    .btn-circle {
+    .avatar-sm {
     width: 32px;
     height: 32px;
-    padding: 0;
-    display: inline-flex;
+    border-radius: 50%;
+    display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
+    background-color: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary-text-emphasis);
+    font-weight: 600;
     }
 
-    @media (max-width: 767.98px) {
-    .table-responsive {
-      border: none;
-    }
-
+    @media (max-width: 991.98px) {
     .table thead {
       display: none;
     }
@@ -145,114 +158,127 @@
       display: block;
       margin-bottom: 1rem;
       border: 1px solid #dee2e6;
-      border-radius: 0.25rem;
+      border-radius: .5rem;
+      box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
     }
 
     .table td {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #dee2e6;
-      padding-left: 50%;
-      position: relative;
+      border-bottom: 1px solid #f0f0f0;
+      padding: 0.75rem 1rem;
     }
 
-    .table td:before {
+    .table td::before {
       content: attr(data-label);
-      position: absolute;
-      left: 1rem;
-      width: calc(50% - 1rem);
-      padding-right: 1rem;
       font-weight: 600;
-      text-align: left;
+      color: #6c757d;
+      margin-right: 1rem;
+      flex-shrink: 0;
     }
 
     .table td:last-child {
-      border-bottom: none;
-    }
-
-    .table td .d-flex {
-      justify-content: flex-end;
+      border-bottom: 0;
     }
     }
   </style>
 @endpush
 
 @push('scripts')
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     $(document).ready(function () {
-    // Enable tooltips
-    $('[data-bs-toggle="tooltip"]').tooltip();
+    var tableElement = $('#sale-returns-table:not(.is-empty)');
 
-    // Add data-label attributes for responsive table
-    $('#sale-returns-table thead th').each(function (index) {
-      $('#sale-returns-table tbody td:nth-child(' + (index + 1) + ')').attr('data-label', $(this).text());
-    });
-
-    // Initialize DataTable with proper column count
-    $('#sale-returns-table').DataTable({
-      "columns": [
-      { "width": "5%" }, // No.
-      null, // Nomor Retur
-      null, // Tgl. Retur
-      null, // No. Faktur
-      null, // Pelanggan
-      { "className": "text-end" }, // Total Retur
-      { "className": "text-end" }, // Refund
-      null, // Kasir
-      {
-        "width": "15%",
-        "className": "text-center",
-        "orderable": false,
-        "searchable": false
-      } // Aksi
-      ],
-      "paging": true,
-      "lengthChange": true,
-      "searching": true,
-      "ordering": true,
-      "info": true,
-      "autoWidth": false,
-      "responsive": true,
-      "language": {
-      "search": "Cari:",
-      "zeroRecords": "Tidak ada data yang cocok",
-      "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-      "infoEmpty": "Menampilkan 0 sampai 0 dari 0 data",
-      "paginate": {
-        "first": "Pertama",
-        "last": "Terakhir",
-        "next": "Selanjutnya",
-        "previous": "Sebelumnya"
-      }
+    if (tableElement.length) {
+      var table = tableElement.DataTable({
+      dom: 'rt<"d-flex justify-content-between align-items-center p-3"ip>',
+      paging: true,
+      searching: true,
+      lengthChange: false,
+      ordering: true,
+      info: true,
+      autoWidth: false,
+      responsive: false,
+      order: [[2, 'desc']],
+      language: {
+        search: "",
+        zeroRecords: "Tidak ada data retur yang cocok.",
+        info: "Menampilkan _START_ - _END_ dari _TOTAL_ retur",
+        infoEmpty: "Menampilkan 0 retur",
+        paginate: { next: "›", previous: "‹" }
       },
-      "order": [[2, 'desc']], // Order by return date (column index 2)
-      "drawCallback": function (settings) {
-      // Re-add data-labels after table redraw
-      $('#sale-returns-table thead th').each(function (index) {
-        $('#sale-returns-table tbody td:nth-child(' + (index + 1) + ')').attr('data-label', $(this).text());
-      });
+      columnDefs: [
+        {
+        searchable: false, orderable: false, targets: 0,
+        render: (data, type, row, meta) => meta.row + meta.settings._iDisplayStart + 1
+        },
+        { orderable: false, searchable: false, targets: 6 }
+      ],
+      drawCallback: function (settings) {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        [...tooltipTriggerList].map(tooltip => new bootstrap.Tooltip(tooltip));
       }
-    });
+      });
 
-    // Delete confirmation with SweetAlert
-    $(document).on('submit', '.delete-form', function (e) {
+      $('#custom-search-input').on('keyup', function () {
+      table.search(this.value).draw();
+      });
+    } else {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(tooltip => new bootstrap.Tooltip(tooltip));
+    }
+
+    // Logika SweetAlert untuk Hapus via AJAX
+    $(document).on('click', '.delete-btn', function (e) {
       e.preventDefault();
-      var form = this;
+
+      const button = $(this);
+      const url = button.data('url');
+      const returnName = button.data('name');
+      const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
       Swal.fire({
-      title: 'Konfirmasi Hapus',
-      text: "Anda yakin ingin menghapus retur ini? Tindakan ini akan mengembalikan stok barang.",
+      title: 'Anda Yakin?',
+      html: `Menghapus retur <b>#${returnName}</b> akan mengurangi stok barang. Aksi ini tidak dapat dibatalkan.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
+      cancelButtonColor: '#6c757d',
       confirmButtonText: 'Ya, Hapus!',
       cancelButtonText: 'Batal'
       }).then((result) => {
       if (result.isConfirmed) {
-        form.submit();
+        $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+          _token: csrfToken,
+          _method: 'DELETE'
+        },
+        success: function (response) {
+          if (typeof table !== 'undefined') {
+          table.row(button.closest('tr')).remove().draw(false);
+          } else {
+          location.reload();
+          }
+
+          Swal.fire({
+          title: 'Berhasil Dihapus!',
+          text: response.success,
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+          });
+        },
+        error: function (xhr) {
+          let errorMsg = 'Terjadi kesalahan saat menghapus data.';
+          if (xhr.responseJSON && xhr.responseJSON.error) {
+          errorMsg = xhr.responseJSON.error;
+          }
+          Swal.fire('Gagal!', errorMsg, 'error');
+        }
+        });
       }
       });
     });

@@ -16,6 +16,7 @@ class Pembelian extends Model
         'notes',
         'total_amount',
         'user_id',
+        'purchase_number', 
     ];
 
     protected $casts = [

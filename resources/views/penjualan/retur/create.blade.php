@@ -133,7 +133,6 @@
 @endsection
 
 @push('styles')
-  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <style>
     .select2-container .select2-selection--single {
     height: calc(1.5em + .75rem + 2px);
@@ -151,7 +150,6 @@
 @endpush
 
 @push('scripts')
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script>
     $(document).ready(function () {
     $('.select2').select2({
@@ -159,13 +157,11 @@
       allowClear: true
     });
 
-    var returnedItems = {}; // {itemId: {name, price_per_unit, quantity_to_return, sale_item_quantity, original_stock_when_sold}}
-
-    // Fungsi untuk memperbarui tabel item yang diretur
+    var returnedItems = {};
     function updateReturnedItemsTable() {
       var totalAmount = 0;
       var $tableBody = $('#returned-items-table tbody');
-      $tableBody.empty(); // Bersihkan tabel
+      $tableBody.empty();
 
       for (var itemId in returnedItems) {
       var item = returnedItems[itemId];

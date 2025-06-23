@@ -8,12 +8,13 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PembelianController extends Controller
 {
     public function index()
     {
-         $pembelians = Pembelian::latest()->with('supplier', 'items')->paginate(10);
+         $pembelians = Pembelian::latest()->with('supplier', 'items')->get();
     return view('pembelian.index', compact('pembelians'));
     }
 
@@ -38,12 +39,34 @@ class PembelianController extends Controller
 
         DB::beginTransaction();
         try {
+            // --- Generate Nomor Pembelian Unik ---
+            $currentDate = Carbon::parse($request->purchase_date);
+            $prefix = 'PO-' . $currentDate->format('Ymd'); // Contoh: PO-20240527
+
+            // Cari nomor pembelian terakhir untuk tanggal yang sama
+            $lastPembelian = Pembelian::where('purchase_number', 'like', $prefix . '%')
+                                        ->orderBy('purchase_number', 'desc')
+                                        ->first();
+
+            $sequence = 1;
+            if ($lastPembelian) {
+                // Ambil nomor urut dari nomor pembelian terakhir
+                // Contoh: PO-20240527-0012 -> ambil 0012
+                $lastNumber = (int) substr($lastPembelian->purchase_number, -4);
+                $sequence = $lastNumber + 1;
+            }
+
+            // Format nomor urut menjadi 4 digit dengan leading zeros (0001, 0002, dst)
+            $purchaseNumber = $prefix . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+            // --- Akhir Generate Nomor Pembelian Unik ---
+
             $pembelian = Pembelian::create([
                 'supplier_id' => $request->supplier_id,
                 'purchase_date' => $request->purchase_date,
                 'notes' => $request->notes,
-                'total_amount' => 0, // Will be updated later
+                'total_amount' => 0, // Akan diupdate nanti
                 'user_id' => Auth::id(),
+                'purchase_number' => $purchaseNumber, // Simpan nomor pembelian
             ]);
 
             $totalAmount = 0;
@@ -61,17 +84,19 @@ class PembelianController extends Controller
                     'subtotal' => $subtotal,
                 ]);
 
+                // Pastikan `stock` di model Item sudah ada dan benar tipenya (integer)
                 $item->increment('stock', $itemData['quantity']);
             }
 
             $pembelian->update(['total_amount' => $totalAmount]);
 
             DB::commit();
-            return redirect()->route('pembelian.index')->with('success', 'Pembelian berhasil disimpan.');
+            return redirect()->route('pembelian.index')->with('success', 'Pembelian berhasil disimpan dengan nomor ' . $purchaseNumber . '.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan saat menyimpan pembelian.'])->withInput();
+            // Anda bisa log $e->getMessage() untuk debugging lebih lanjut
+            return redirect()->back()->withErrors(['error_simpan' => 'Terjadi kesalahan saat menyimpan pembelian: ' . $e->getMessage()])->withInput();
         }
     }
 

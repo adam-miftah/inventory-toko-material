@@ -11,7 +11,7 @@ class ReturPembelianItem extends Model
 
     protected $fillable = [
         'retur_pembelian_id',
-        'pembelian_item_id', // Untuk referensi ke item pembelian yang diretur
+        'pembelian_item_id',
         'item_id',
         'item_name',
         'quantity',

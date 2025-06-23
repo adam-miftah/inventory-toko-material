@@ -30,17 +30,19 @@
       <div class="mb-3">
         <label for="type" class="form-label">Tipe Barang</label>
         <select class="form-select" id="type" name="type" required>
-        <option value="generic" {{ old('type', $category->type) == 'generic' ? 'selected' : '' }}>Umum (misal: Kayu,
+        <option value="general" {{ old('type', $category->type) == 'general' ? 'selected' : '' }}>Umum (misal: Kayu,
           Besi, dll.)</option>
         <option value="keramik" {{ old('type', $category->type) == 'keramik' ? 'selected' : '' }}>Keramik</option>
         <option value="cat" {{ old('type', $category->type) == 'cat' ? 'selected' : '' }}>Cat</option>
+        <option value="luar" {{ old('type', $category->type) == 'luar' ? 'selected' : '' }}>Barang Luar</option> {{--
+        Ditambahkan: Opsi Barang Luar --}}
         </select>
         <div class="form-text">
         Pilih tipe barang. Keramik dan Cat memiliki kolom data spesifik.
         </div>
       </div>
       <button type="submit" class="btn btn-success btn-sm">Update</button>
-      <a href="{{ route('inventory.categories') }}" class="btn btn-outline-secondary btn-sm">Batal</a>
+      <a href="{{ route('inventory.categories.index') }}" class="btn btn-outline-secondary btn-sm">Batal</a>
       </form>
     </div>
     </div>

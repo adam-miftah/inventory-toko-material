@@ -12,6 +12,7 @@ class ReturPembelian extends Model
 
     protected $fillable = [
         'pembelian_id',
+        'return_number',
         'retur_date',
         'notes',
         'total_returned_amount',

@@ -13,14 +13,15 @@
     @endif
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h4 class=" mb-0 text-gray-800">Detail Transaksi #{{ $transaksi->invoice_number }}</h4>
+    <h4 class=" mb-0 text-gray-800">Detail Transaksi [{{ $transaksi->invoice_number }}]</h4>
     <div>
-      <a href="{{ route('penjualan.transaksi.index') }}" class="btn btn-outline-secondary btn-sm">
+      <a href="{{ route('penjualan.transaksi.index') }}" class="btn btn-secondary btn-sm">
       <i class="fas fa-arrow-left me-2"></i>Kembali
       </a>
-      <button onclick="window.print()" class="btn btn-success btn-sm">
-      <i class="fas fa-print me-2"></i>Cetak
-      </button>
+      <a href="{{ route('penjualan.transaksi.print_receipt', $transaksi) }}" target="_blank"
+      class="btn btn-success btn-sm">
+      <i class="fas fa-print me-2"></i>Cetak Struk
+      </a>
     </div>
     </div>
 
@@ -165,6 +166,7 @@
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+    font-size: 0.8rem;
     }
 
 
@@ -188,6 +190,10 @@
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.5px;
+    }
+
+    .table td {
+    font-size: 0.8rem;
     }
 
     @media (max-width: 768px) {

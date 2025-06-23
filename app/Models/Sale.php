@@ -9,7 +9,12 @@ class Sale extends Model
 {
     use HasFactory;
     protected $table = 'sales';
+    
+    // Catatan: Anda mungkin ingin memeriksa kembali penggunaan $with ini.
+    // Eager loading 'items' setiap saat bisa jadi tidak efisien jika Anda tidak selalu butuh detail item.
+    // Namun, ini tidak terkait dengan masalah waktu Anda.
     protected $with = ['items'];
+
     protected $fillable = [
         'invoice_number',
         'sale_date',
@@ -25,8 +30,13 @@ class Sale extends Model
         'notes',
     ];
 
+    /**
+     * The attributes that should be cast.
+     * Mengubah 'date' menjadi 'datetime' adalah kuncinya.
+     * @var array
+     */
     protected $casts = [
-        'sale_date' => 'date',
+        'sale_date' => 'datetime', // <-- PERUBAHAN DI SINI
     ];
 
     public function user()
@@ -36,6 +46,7 @@ class Sale extends Model
 
     public function items()
     {
-        return $this->hasMany(SaleItem::class);
+        // Pastikan nama relasi ini sudah benar. Di controller Anda mungkin menggunakan nama lain.
+        return $this->hasMany(SaleItem::class); 
     }
 }

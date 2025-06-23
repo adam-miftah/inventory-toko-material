@@ -7,6 +7,7 @@ use App\Models\Sale;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -99,8 +100,8 @@ class SaleReturnController extends Controller
             $saleReturn = SaleReturn::create([
                 'return_number' => $returnNumber,
                 'sale_id' => $request->sale_id,
-                'user_id' => Auth::id(), // User yang sedang login
-                'return_date' => $request->return_date,
+                'user_id' => Auth::id(), 
+                'return_date' => now(),
                 'total_returned_amount' => $totalReturnedAmount,
                 'refund_amount' => $request->refund_amount,
                 'reason' => $request->reason,
@@ -131,23 +132,51 @@ class SaleReturnController extends Controller
         $retur->load(['sale.items.item', 'user', 'items.item']);
         return view('penjualan.retur.show', compact('retur'));
     }
-    public function destroy(SaleReturn $retur)
+    public function destroy(Request $request, SaleReturn $return)
     {
+        // Gunakan DB Transaction untuk memastikan semua proses aman
         DB::beginTransaction();
+
         try {
-            // Kembalikan stok barang sebelum menghapus retur
-            foreach ($retur->items as $returnItem) {
-                $item = Item::find($returnItem->item_id);
-                if ($item) {
-                    $item->decrement('stock', $returnItem->quantity);
+            // Ambil semua item yang ada di dalam retur ini
+            // Pastikan model SaleReturn Anda punya relasi 'returnItems' atau sejenisnya
+            $returnItems = $return->returnItems; 
+
+            // Kurangi kembali stok untuk setiap item yang diretur
+            foreach ($returnItems as $returnItem) {
+                $product = Item::find($returnItem->item_id);
+                if ($product) {
+                    // Kurangi stok sejumlah yang diretur (kebalikan dari proses retur)
+                    $product->decrement('stock', $returnItem->quantity);
                 }
             }
-            $retur->delete();
+
+            $returnNumber = $return->return_number;
+            $return->delete();
+
+            // Jika semua berhasil, simpan perubahan
             DB::commit();
-            return redirect()->route('penjualan.retur.index')->with('success', 'Retur penjualan berhasil dihapus dan stok dikembalikan.');
+
+            $successMessage = 'Retur #' . $returnNumber . ' berhasil dihapus dan stok telah disesuaikan.';
+
+            if ($request->ajax()) {
+                return response()->json(['success' => $successMessage]);
+            }
+
+            return redirect()->route('penjualan.retur.index')->with('success', $successMessage);
+
         } catch (\Exception $e) {
+            // Jika ada error, batalkan semua proses
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menghapus retur: ' . $e->getMessage());
+
+            Log::error('Gagal menghapus retur: ' . $e->getMessage());
+            $errorMessage = 'Terjadi kesalahan fatal saat menghapus data retur.';
+
+            if ($request->ajax()) {
+                return response()->json(['error' => $errorMessage], 500);
+            }
+
+            return redirect()->route('penjualan.retur.index')->with('error', $errorMessage);
         }
     }
 }

@@ -44,20 +44,6 @@
       position: relative;
     }
 
-    /* 
-    .header:after {
-      content: "";
-      position: absolute;
-      bottom: -10px;
-      left: 0;
-      right: 0;
-      height: 20px;
-      background: linear-gradient(to bottom right, transparent 49%, var(--primary-color) 50%),
-        linear-gradient(to bottom left, transparent 49%, var(--primary-color) 50%);
-      background-size: 20px 20px;
-      background-repeat: repeat-x;
-    } */
-
     .header p {
       margin: 3px 0;
       font-size: 0.75rem;
@@ -201,45 +187,6 @@
       height: auto;
     }
 
-    .action-buttons {
-      text-align: center;
-      margin: 30px auto;
-      max-width: 80mm;
-    }
-
-    .action-buttons button,
-    .action-buttons a {
-      padding: 12px 25px;
-      margin: 5px;
-      border: none;
-      border-radius: 30px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-      font-weight: 500;
-      transition: all 0.3s;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .action-buttons .print-btn {
-      background-color: var(--primary-color);
-      color: white;
-    }
-
-    .action-buttons .print-btn:hover {
-      background-color: #1a252f;
-    }
-
-    .action-buttons .back-btn {
-      background-color: white;
-      color: var(--primary-color);
-      border: 1px solid var(--primary-color);
-    }
-
-    .action-buttons .back-btn:hover {
-      background-color: var(--light-gray);
-    }
-
     /* Gaya khusus untuk pencetakan */
     @media print {
       body {
@@ -294,17 +241,40 @@
     .cut-line:after {
       right: 0;
     }
+
+    /* Tombol proses penjualan */
+    .process-btn {
+      display:
+        {{ isset($is_print_view) && $is_print_view ? 'none' : 'block' }}
+      ;
+      text-align: center;
+      margin: 20px auto;
+    }
+
+    .process-btn button {
+      padding: 12px 25px;
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .process-btn button:hover {
+      background-color: #2980b9;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
     <div class="header">
-      <!-- Ganti dengan logo perusahaan Anda -->
-      <img src="{{ asset('images/newstruk.png') }}" alt="Company Logo" class="logo" style="margin-bottom: -40px;">
-      <h4 style="margin-bottom: 0;">TB SOGOL ANUGRAH MANDIRI</h4>
-      <p>Jl. Contoh No.123, Kota Anda</p>
-      <p>Telp: (021) 12345678 | Email: info@perusahaan.com</p>
+      <img src="{{ asset('images/newstruk.png') }}" alt="Company Logo" class="logo" onerror="this.style.display='none'">
+      <h4 style="margin-bottom: 0;">{{ $settings->store_name }}</h4>
+      <p>{{ $settings->store_address }}<br>Telp: {{ $settings->store_phone }}<br>Email: {{ $settings->store_email }}</p>
     </div>
     <hr>
     <div class="info-section">
@@ -315,9 +285,17 @@
         </div>
         <div class="info-item">
           <span class="info-label">Tanggal</span>
-          <span class="info-value">{{ now()->timezone('Asia/Jakarta')->format('d M Y H:i') }}</span>
+          <span
+            class="info-value">{{ \Carbon\Carbon::parse($sale->sale_date)->timezone('Asia/Jakarta')->format('d M Y H:i') }}</span>
         </div>
-
+        <div class="info-item">
+          <span class="info-label">Kasir</span>
+          <span class="info-value">{{ $sale->user->name ?? 'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Pelanggan</span>
+          <span class="info-value">{{ $sale->customer_name ?? 'Umum' }}</span>
+        </div>
       </div>
     </div>
     <hr>
@@ -325,7 +303,7 @@
       <table>
         <thead>
           <tr>
-            <th>#</th>
+            <th>Id</th>
             <th>Item</th>
             <th>Qty</th>
             <th style="text-align: right;">Harga</th>
@@ -387,7 +365,6 @@
   @endif
 
     <div class="barcode">
-      <!-- Anda bisa menambahkan barcode generator untuk nomor invoice -->
       <img src="https://barcode.tec-it.com/barcode.ashx?data={{ $sale->invoice_number }}&code=Code128&dpi=96"
         alt="Barcode">
     </div>
@@ -397,25 +374,27 @@
     <div class="footer">
       <div class="thank-you">Terima kasih telah berbelanja!</div>
       <p>Barang yang sudah dibeli tidak dapat ditukar/dikembalikan</p>
-      <p>~ TB. SOGOL ANUGRAH MANDIRI ~</p>
+      <p>~ {{ $settings->store_name }} ~</p>
     </div>
   </div>
 
-  <div class="action-buttons">
-    <button class="print-btn" onclick="window.print()">Cetak Struk</button>
-    <a href="{{ route('penjualan.transaksi.index') }}" class="back-btn">Kembali ke Transaksi</a>
+  <div class="process-btn">
+    <button onclick="window.print()">
+      <i class="fas fa-print"></i> Cetak Struk
+    </button>
   </div>
 
   <script>
     // Otomatis memicu dialog cetak saat halaman dimuat
     window.onload = function () {
-      // Uncomment baris berikut untuk auto-print
-      // window.print();
+      @if(isset($is_print_view) && $is_print_view)
+      window.print();
 
       // Opsional: Tutup tab setelah dicetak (hanya bekerja di beberapa browser)
       window.onafterprint = function () {
-        // window.close();
+      window.close();
       };
+    @endif
     };
   </script>
 </body>

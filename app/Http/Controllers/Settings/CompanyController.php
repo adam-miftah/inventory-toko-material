@@ -3,49 +3,64 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
-use App\Models\Company; // Asumsikan Anda memiliki model Company
+use App\Models\CompanySetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
 {
     /**
+     * Menampilkan halaman profil perusahaan.
+     */
+    public function index()
+    {
+        // Ambil data pertama, atau buat data default jika tabel masih kosong
+        $company = CompanySetting::firstOrCreate(
+            ['id' => 1],
+            ['name' => 'TB. SOGOL ANUGRAH MANDIRI']
+        );
+        return view('settings.company.index', compact('company'));
+    }
+
+    /**
      * Menampilkan form untuk mengedit profil perusahaan.
-     *
-     * @return \Illuminate\Contracts\View\View
      */
     public function edit()
     {
-        $company = Company::first(); // Ambil data perusahaan pertama (atau sesuaikan logika jika berbeda)
+        $company = CompanySetting::firstOrCreate(
+            ['id' => 1],
+            ['name' => 'TB. SOGOL ANUGRAH MANDIRI']
+        );
         return view('settings.company.edit', compact('company'));
     }
 
     /**
-     * Menyimpan atau memperbarui data profil perusahaan.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Memperbarui profil perusahaan di database.
      */
     public function update(Request $request)
     {
         $request->validate([
-            'company_name' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'address' => 'nullable|string',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
-            // Tambahkan validasi untuk field lain sesuai kebutuhan
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $company = Company::first(); // Ambil data perusahaan pertama (atau sesuaikan logika)
+        $company = CompanySetting::firstOrCreate(['id' => 1]);
+        $data = $request->except('logo');
 
-        if ($company) {
-            $company->update($request->all());
-            session()->flash('success', 'Profil perusahaan berhasil diperbarui.');
-        } else {
-            // Jika tidak ada data perusahaan, buat baru (opsional, tergantung kebutuhan)
-            Company::create($request->all());
-            session()->flash('success', 'Profil perusahaan berhasil disimpan.');
+        if ($request->hasFile('logo')) {
+            // Hapus logo lama jika ada
+            if ($company->logo && Storage::disk('public')->exists($company->logo)) {
+                Storage::disk('public')->delete($company->logo);
+            }
+            // Simpan logo baru dan dapatkan path-nya
+            $data['logo'] = $request->file('logo')->store('company_logo', 'public');
         }
 
-        return redirect()->route('settings.company.edit');
+        $company->update($data);
+
+        return redirect()->route('settings.company.index')->with('success', 'Profil perusahaan berhasil diperbarui.');
     }
 }

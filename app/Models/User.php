@@ -20,6 +20,7 @@ class User extends Authenticatable
 protected $attributes = [
     'role' => 'staff' // default value
 ];
+
     protected function casts(): array
     {
         return [

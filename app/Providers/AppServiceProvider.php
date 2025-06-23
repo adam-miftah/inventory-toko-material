@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,5 +39,6 @@ class AppServiceProvider extends ServiceProvider
             }
             return true;
         });
+        Paginator::useTailwind();
     }
 }

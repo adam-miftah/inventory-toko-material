@@ -4,212 +4,167 @@
 
 @section('content')
     <div class="container-fluid">
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <div>
-                <h4 class=" mb-0 text-gray-800">Daftar Transaksi Penjualan</h4>
-            </div>
-            <div class="d-flex">
-                <a href="{{ route('penjualan.transaksi.create') }}"
-                    class="btn btn-outline-primary btn-sm d-flex align-items-center">
-                    <i class="fas fa-plus-circle me-2"></i> Transaksi Baru
-                </a>
-            </div>
-        </div>
-
+        {{-- Notifikasi Session --}}
         @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-check-circle me-2"></i>
-                    <div>{{ session('success') }}</div>
-                </div>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                {{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
         @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    <div>{{ session('error') }}</div>
-                </div>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-body py-3">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label small text-muted mb-1">Tanggal Mulai</label>
-                        <input type="date" class="form-control form-control-sm" id="start-date">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label small text-muted mb-1">Tanggal Akhir</label>
-                        <input type="date" class="form-control form-control-sm" id="end-date">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label small text-muted mb-1">Metode Pembayaran</label>
-                        <select class="form-select form-select-sm" id="payment-method">
-                            <option value="">Semua</option>
-                            <option value="cash">Cash</option>
-                            <option value="transfer">Transfer</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button class="btn btn-sm btn-outline-primary me-2" id="filter-btn">
-                            <i class="fas fa-filter me-1"></i> Filter
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" id="reset-btn">
-                            Reset
-                        </button>
+        {{-- Card Utama --}}
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white p-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <h4 class="mb-0 fw-bold text-gradient">
+                        <i class="fas fa-cash-register me-2"></i>Daftar Transaksi
+                    </h4>
+                    <a href="{{ route('penjualan.transaksi.create') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus-circle me-1"></i> Transaksi Baru
+                    </a>
+                </div>
+                <hr class="my-3">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-12">
+                        <div class="input-group input-group-sm" style="max-width: 350px; margin-left: auto;">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" id="custom-search-input" class="form-control border-start-0"
+                                placeholder="Cari di semua kolom...">
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card shadow-sm">
-            <div
-                class="card-header bg-white py-3 d-flex flex-column flex-md-row justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-list-alt me-2"></i> Daftar Transaksi
-                </h6>
-                <div class="mt-2 mt-md-0">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-light border-0"><i class="fas fa-search"></i></span>
-                        <input type="text" id="search-input" class="form-control border-0 bg-light"
-                            placeholder="Cari transaksi...">
-                    </div>
-                </div>
-            </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="sales-table" style="width:100%">
-                        <thead class="bg-light">
+                    <table class="table table-hover align-middle mb-0 @if($sales->isEmpty()) is-empty @endif"
+                        id="sales-table" style="width:100%">
+                        <thead class="table-light">
                             <tr>
-                                <th>No.</th>
-                                <th>Nomor Faktur</th>
-                                <th>Tanggal</th>
-                                <th>Nama Barang</th>
-                                <th>Total</th>
-                                <th>Pembayaran</th>
-                                <th>Kasir</th>
-                                <th>Aksi</th>
+                                <th class="text-center" width="5%">No.</th>
+                                <th class="text-start">Nomor Faktur</th>
+                                <th class="text-start">Tanggal</th>
+                                <th class="text-start">Pelanggan</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-center">Pembayaran</th>
+                                <th class="text-start">Kasir</th>
+                                <th class="text-center" width="10%">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($sales as $sale)
                                 <tr>
-                                    <td class="text-center">{{ $loop->iteration }}</td>
-                                    <td>
-                                        <span class="fw-bold">{{ $sale->invoice_number }}</span>
+                                    {{-- Nomor akan diisi oleh DataTables --}}
+                                    <td data-label="No." class="text-center fw-semibold"></td>
+                                    <td data-label="Faktur">
+                                        <a href="{{ route('penjualan.transaksi.show', $sale) }}"
+                                            class="fw-bold text-primary text-decoration-none">
+                                            {{ $sale->invoice_number }}
+                                        </a>
                                     </td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <span>{{ $sale->sale_date->format('d M Y') }}</span>
-                                        </div>
+                                    <td data-label="Tanggal" data-order="{{ $sale->sale_date->timestamp }}">
+                                        <span class="text-nowrap">{{ $sale->sale_date->isoFormat('DD MMM YY') }}</span>
+                                        <small class="d-block text-muted">{{ $sale->sale_date->format('H:i') }}</small>
                                     </td>
-                                    <td>{{ $sale->items->first()->item_name ?? '-' }}</td>
-                                    <td class="fw-bold">{{ 'Rp ' . number_format($sale->grand_total, 0, ',', '.') }}
+                                    <td data-label="Pelanggan">{{ $sale->customer_name ?? 'Umum' }}</td>
+                                    <td data-label="Total" class="text-end fw-bold" data-order="{{ $sale->grand_total }}">
+                                        Rp {{ number_format($sale->grand_total, 0, ',', '.') }}
                                     </td>
-                                    <td>
-                                        <span class="badge @if ($sale->payment_method == 'cash') bg-success
-                                        @else bg-warning text-dark @endif">
+                                    <td data-label="Pembayaran" class="text-center">
+                                        @php $badgeClass = ($sale->payment_method == 'cash') ? 'success' : 'info'; @endphp
+                                        <span
+                                            class="badge bg-{{$badgeClass}}-subtle text-{{$badgeClass}}-emphasis border border-{{$badgeClass}}-subtle rounded-pill">
+                                            <i
+                                                class="fas fa-{{ $badgeClass == 'success' ? 'money-bill-wave' : 'credit-card' }} me-1"></i>
                                             {{ ucfirst($sale->payment_method) }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="Kasir">
                                         <div class="d-flex align-items-center">
-                                            <div class="me-2">
-                                                <div
-                                                    class="avatar-sm bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center">
-                                                    {{ substr($sale->user->name, 0, 1) }}
-                                                </div>
+                                            <div class="avatar-sm me-2" data-bs-toggle="tooltip"
+                                                title="{{ $sale->user->name }}">
+                                                {{ substr($sale->user->name, 0, 1) }}
                                             </div>
-                                            <span>{{ $sale->user->name }}</span>
+                                            <span class="d-none d-lg-inline">{{ $sale->user->name }}</span>
                                         </div>
                                     </td>
-                                    <td class="text-center">
-                                        <a href="{{ route('penjualan.transaksi.show', $sale) }}"
-                                            class="btn btn-sm btn-outline-primary" title="Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-secondary" title="Cetak"
-                                            onclick="printInvoice('{{ $sale->id }}')">
-                                            <i class="fas fa-print"></i>
-                                        </button>
+                                    <td data-label="Aksi" class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="{{ route('penjualan.transaksi.show', $sale) }}"
+                                                class="btn btn-sm btn-outline-info rounded-circle" data-bs-toggle="tooltip"
+                                                title="Lihat Detail">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-secondary rounded-circle"
+                                                onclick="printInvoice('{{ $sale->id }}')" data-bs-toggle="tooltip"
+                                                title="Cetak Struk">
+                                                <i class="fas fa-print"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center py-4">Tidak ada data transaksi</td>
+                                    <td colspan="8" class="text-center py-5 text-muted">
+                                        <i class="fas fa-folder-open fa-3x mb-3"></i>
+                                        <p class="mb-0">Tidak ada data transaksi yang ditemukan.</p>
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div class="card-footer bg-white py-3">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                    <div class="mb-2 mb-md-0">
-                        Menampilkan <span class="fw-bold">{{ $sales->firstItem() }}</span> sampai <span
-                            class="fw-bold">{{ $sales->lastItem() }}</span> dari <span
-                            class="fw-bold">{{ $sales->total() }}</span>
-                        transaksi
-                    </div>
-                    <div>
-                        {{ $sales->links() }}
-                    </div>
-                </div>
-            </div>
+            {{-- PERBAIKAN: Footer paginasi Laravel dihapus karena tidak lagi diperlukan --}}
         </div>
     </div>
+@endsection
 
+@push('styles')
     <style>
-        .avatar-sm {
-            width: 28px;
-            height: 28px;
-            font-size: 0.8rem;
+        .text-gradient {
+            background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
         .table th {
+            font-weight: 600;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            font-size: 12px;
             letter-spacing: 0.5px;
-            border-top: none;
-
         }
 
         .table td {
             vertical-align: middle;
-            font-size: 12px;
-            text-align: start;
+            font-size: 0.875rem;
         }
 
-        .badge {
-            font-weight: 500;
-            padding: 0.35em 0.65em;
+        .avatar-sm {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bs-primary-bg-subtle);
+            color: var(--bs-primary-text-emphasis);
+            font-weight: 600;
         }
 
-        .card {
-            border-radius: 10px;
-            overflow: hidden;
-            border: none;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-        }
-
-        .card-header {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .form-control,
-        .form-select {
-            border-radius: 6px;
-        }
-
-        @media (max-width: 768px) {
-            .table-responsive {
-                border: 0;
-            }
-
+        /* Tampilan Kartu Responsif untuk Tabel */
+        @media (max-width: 991.98px) {
             .table thead {
                 display: none;
             }
@@ -217,189 +172,84 @@
             .table tr {
                 display: block;
                 margin-bottom: 1rem;
-                border-radius: 8px;
-                box-shadow: 0 0 0.75rem rgba(0, 0, 0, 0.05);
+                border: 1px solid #dee2e6;
+                border-radius: .5rem;
+                box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
             }
 
             .table td {
                 display: flex;
-                justify-content: space-between;
                 align-items: center;
+                justify-content: space-between;
+                text-align: right;
                 border-bottom: 1px solid #f0f0f0;
-                padding: 0.75rem;
-            }
-
-            .table td:before {
-                content: attr(data-label);
-                font-weight: 600;
-                margin-right: 1rem;
-                color: #6c757d;
-                flex: 0 0 120px;
+                padding: 0.75rem 1rem;
             }
 
             .table td:last-child {
                 border-bottom: 0;
             }
 
-            .table td.text-center {
-                justify-content: center;
+            .table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #6c757d;
+                margin-right: 1rem;
+                text-align: left;
             }
-
-            .table td.text-end {
-                justify-content: flex-end;
-            }
-        }
-
-        /* .pagination-info {
-                                                                                                                                                                                                display: none !important;
-                                                                                                                                                                                                } */
-
-        .dataTables_length {
-            /* display: none !important; */
-            margin: 0 15px !important;
-        }
-
-        .dataTables_paginate {
-            margin: 0 15px !important;
-            /* Atur margin kiri-kanan */
-            padding: 10px 5px 5px 5px !important;
-            border-radius: 4px !important;
         }
     </style>
-@endsection
+@endpush
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
-            // Initialize DataTable with enhanced options
-            var table = $('#sales-table').DataTable({
-                "dom": '<"top"f>rt<"bottom"lip><"clear">',
-                "responsive": true,
-                "info": false, // Menghilangkan info "Showing x to y of z entries"
-                // "lengthChange": false,
-                "language": {
-                    "search": "",
-                    "searchPlaceholder": "Cari transaksi...",
-                    "lengthMenu": "Tampilkan _MENU_ transaksi per halaman",
-                    "zeroRecords": "Tidak ada transaksi ditemukan",
-                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ transaksi",
-                    "infoEmpty": "Menampilkan 0 sampai 0 dari 0 transaksi",
-                    "infoFiltered": "(disaring dari _MAX_ total transaksi)",
-                    "paginate": {
-                        "first": "Pertama",
-                        "last": "Terakhir",
-                        "next": "Selanjutnya",
-                        "previous": "Sebelumnya"
-                    }
-                },
-                "columnDefs": [{
-                    "orderable": false,
-                    "targets": [0, 7],
-                    "className": "text-center"
-                }, {
-                    "orderable": true,
-                    "targets": [1, 2, 3, 4, 5, 6],
-                    "responsivePriority": 1
-                }],
-                "order": [[2, 'desc']],
-                "drawCallback": function (settings) {
-                    // Add data-label attributes for responsive display
-                    if ($(window).width() < 768) {
-                        $('thead th').each(function (i) {
-                            $('tbody td').eq(i).attr('data-label', $(this).text());
-                        });
-                    }
-                },
-                "data": @json($sales->items()),
-                "columns": [{
-                    "data": null,
-                    "className": "text-center",
-                    "orderable": false,
-                    "render": function (data, type, row, meta) {
-                        return meta.row + meta.settings._iDisplayStart + 1;
-                    }
-                }, {
-                    "data": "invoice_number",
-                    "className": "text-center"
-                }, {
-                    "data": "sale_date",
-                    "className": "text-center"
-                }, {
-                    "data": "items.0.item_name",
-                    "defaultContent": "-"
-                }, {
-                    "data": "grand_total",
-                    "className": "text-end"
-                }, {
-                    "data": "payment_method",
-                    "className": "text-center",
-                    "render": function (data) {
-                        var badgeClass = '';
-                        if (data === 'cash') {
-                            badgeClass = 'bg-success';
-                        } else if (data === 'transfer') {
-                            badgeClass = 'bg-info';
-                        } else {
-                            badgeClass = 'bg-warning text-dark';
-                        }
-                        return '<span class="badge ' + badgeClass + '">' + data.charAt(0).toUpperCase() + data.slice(1) + '</span>';
-                    }
-                }, {
-                    "data": "user.name"
-                }, {
-                    "data": null,
-                    "className": "text-center",
-                    "orderable": false,
-                    "render": function (data, type, row) {
-                        return '<a href="/penjualan/transaksi/' + row.id + '" class="btn btn-sm btn-outline-primary" title="Detail"><i class="fas fa-eye"></i></a>' +
-                            '<button class="btn btn-sm btn-outline-secondary" title="Cetak" onclick="printInvoice(\'' + row.id + '\')"><i class="fas fa-print"></i></button>';
-                    }
-                }]
-            });
-
-            // Custom search input
-            $('#search-input').keyup(function () {
-                table.search($(this).val()).draw();
-            });
-
-            // Filter functionality
-            $('#filter-btn').click(function () {
-                var startDate = $('#start-date').val();
-                var endDate = $('#end-date').val();
-                var paymentMethod = $('#payment-method').val();
-
-                var url = "{{ route('penjualan.transaksi.index') }}";
-                var params = [];
-
-                if (startDate) {
-                    params.push("start_date=" + startDate);
-                }
-                if (endDate) {
-                    params.push("end_date=" + endDate);
-                }
-                if (paymentMethod) {
-                    params.push("payment_method=" + paymentMethod);
-                }
-
-                if (params.length > 0) {
-                    window.location.href = url + "?" + params.join("&");
-                } else {
-                    window.location.href = url; // Reload tanpa filter jika tidak ada parameter
-                }
-            });
-            // Reset filters
-            $('#reset-btn').click(function () {
-                $('#start-date').val('');
-                $('#end-date').val('');
-                $('#payment-method').val('');
-                // Trigger filter to reload data
-                $('#filter-btn').click();
-            });
-        });
-
         function printInvoice(saleId) {
-            // Implement print functionality
-            window.open('/penjualan/transaksi/' + saleId + '/print', '_blank'); // <--- URL ini harus sesuai dengan rute
+            const printUrl = "{{ url('/penjualan/transaksi') }}/" + saleId + "/print";
+            window.open(printUrl, '_blank', 'width=800,height=600');
         }
+
+        $(document).ready(function () {
+            var tableElement = $('#sales-table:not(.is-empty)');
+            if (tableElement.length) {
+                var table = tableElement.DataTable({
+                    dom: 'rt<"d-flex justify-content-between align-items-center p-3"ip>',
+                    paging: true,
+                    searching: true,
+                    lengthChange: false,
+                    ordering: true,
+                    info: true,
+                    autoWidth: false,
+                    responsive: false,
+                    order: [[2, 'desc']],
+                    language: {
+                        search: "",
+                        zeroRecords: "Tidak ada transaksi yang cocok.",
+                        info: "Menampilkan _START_ - _END_ dari _TOTAL_ transaksi",
+                        infoEmpty: "Menampilkan 0 transaksi",
+                        paginate: { next: "›", previous: "‹" }
+                    },
+                    columnDefs: [
+                        {
+                            searchable: false, orderable: false, targets: 0,
+                            render: function (data, type, row, meta) {
+                                return meta.row + meta.settings._iDisplayStart + 1;
+                            }
+                        },
+                        { orderable: false, targets: 7 }
+                    ],
+                    drawCallback: function (settings) {
+                        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                        [...tooltipTriggerList].map(tooltip => new bootstrap.Tooltip(tooltip));
+                    }
+                });
+
+                $('#custom-search-input').on('keyup', function () {
+                    table.search(this.value).draw();
+                });
+            } else {
+                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                [...tooltipTriggerList].map(tooltip => new bootstrap.Tooltip(tooltip));
+            }
+        });
     </script>
 @endpush

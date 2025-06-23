@@ -22,4 +22,10 @@ class Supplier extends Model
     {
         return $this->hasMany(Pembelian::class);
     }
+    public function purchases()
+    {
+        // Ganti 'Pembelian::class' jika nama model pembelian Anda berbeda.
+        // Laravel akan secara otomatis mencari foreign key 'supplier_id' di tabel pembelian.
+        return $this->hasMany(Pembelian::class); 
+    }
 }

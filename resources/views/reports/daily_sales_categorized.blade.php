@@ -1,106 +1,268 @@
 @extends('layouts.app')
 
-@section('title', 'Laporan Penjualan Harian per Kategori')
+@section('title', 'Laporan Penjualan Harian')
 
 @section('content')
   <div class="container-fluid">
-    <h4 class="mb-4">Laporan Penjualan Harian per Kategori</h4>
-
-    <div class="card mb-3">
-    <div class="card-body">
-      <form action="{{ route('reports.daily-sales') }}" method="GET" class="d-flex align-items-center">
-      <div class="me-2">
-        <label for="date" class="form-label mb-0">Pilih Tanggal:</label>
-      </div>
-      <div class="me-2">
-        <input type="date" class="form-control form-control-sm" id="date" name="date"
-        value="{{ $filterDate ?? today()->toDateString() }}">
-      </div>
-      <button type="submit" class="btn btn-sm btn-outline-primary me-2">Tampilkan</button>
+    {{-- Header Halaman dengan Filter --}}
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+    <h4 class="mb-0 fw-bold text-gradient">
+      <i class="fas fa-chart-line me-2"></i>Laporan Penjualan Harian
+    </h4>
+    <form action="{{ route('reports.daily-sales') }}" method="GET" class="d-flex align-items-center gap-2">
+      <input type="date" class="form-control form-control-sm w-auto" id="date" name="date"
+      value="{{ $filterDate ?? today()->toDateString() }}">
+      <button type="submit" class="btn btn-sm btn-primary">
+      <i class="fas fa-search me-1"></i> Tampilkan
+      </button>
       <a href="{{ route('reports.print-daily-sales', ['date' => $filterDate ?? today()->toDateString()]) }}"
-        target="_blank" class="btn btn-sm btn-success">Cetak</a>
-      </form>
+      target="_blank" class="btn btn-sm btn-success">
+      <i class="fas fa-print me-1"></i> Cetak
+      </a>
+    </form>
     </div>
-    </div>
-
-    <h5>Tanggal: {{ $filterDate ?? today()->toDateString() }}</h5>
-
-    <div class="row mt-3">
-    <div class="col-md-6">
-      <div class="card mb-3">
-      <div class="card-header">Material</div>
-      <div class="card-body">
-        <h6 class="card-title">Total Penjualan Material</h6>
-        <p class="card-text">Rp {{ number_format($dailySalesMaterial ?? 0, 0, ',', '.') }}</p>
+    <div class="row g-3 mb-4">
+    {{-- Penjualan Bersih Material --}}
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card h-100 border-start border-primary border-4">
+      <div class="card-body d-flex flex-column">
+        <div>
+        <h6 class="text-muted mb-0">Penjualan Bersih</h6>
+        <p class="mb-2 fw-semibold">Material</p>
+        </div>
+        <div class="mt-auto d-flex align-items-end justify-content-between">
+        <h6 class="fw-bolder mb-0">Rp {{ number_format($netSalesMaterial ?? 0, 0, ',', '.') }}</h6>
+        </div>
       </div>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="card mb-3">
-      <div class="card-header">Keramik</div>
-      <div class="card-body">
-        <h6 class="card-title">Total Penjualan Keramik</h6>
-        <p class="card-text">Rp {{ number_format($dailySalesKeramik ?? 0, 0, ',', '.') }}</p>
+    {{-- Penjualan Bersih Keramik --}}
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card h-100 border-start border-warning border-4">
+      <div class="card-body d-flex flex-column">
+        <div>
+        <h6 class="text-muted mb-0">Penjualan Bersih</h6>
+        <p class="mb-2 fw-semibold">Keramik</p>
+        </div>
+        <div class="mt-auto d-flex align-items-end justify-content-between">
+        <h6 class="fw-bolder mb-0">Rp {{ number_format($netSalesKeramik ?? 0, 0, ',', '.') }}</h6>
+        </div>
+      </div>
+      </div>
+    </div>
+    {{-- KARTU BARU: Total Retur --}}
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card h-100 border-start border-danger border-4">
+      <div class="card-body d-flex flex-column">
+        <div>
+        <h6 class="text-muted mb-0">Total Retur</h6>
+        <p class="mb-2 fw-semibold">Hari Ini</p>
+        </div>
+        <div class="mt-auto d-flex align-items-end justify-content-between">
+        <h6 class="fw-bolder mb-0">Rp {{ number_format($totalDailyReturns ?? 0, 0, ',', '.') }}</h6>
+        </div>
+      </div>
+      </div>
+    </div>
+    {{-- Total Penjualan Bersih Keseluruhan --}}
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card h-100 border-start border-success border-4">
+      <div class="card-body d-flex flex-column">
+        <div>
+        <h6 class="text-muted mb-0">Total Penjualan</h6>
+        <p class="mb-2 fw-semibold">Bersih</p>
+        </div>
+        <div class="mt-auto d-flex align-items-end justify-content-between">
+        <h6 class="fw-bolder mb-0">Rp {{ number_format($totalNetDailySales ?? 0, 0, ',', '.') }}</h6>
+        </div>
       </div>
       </div>
     </div>
     </div>
 
-    <div class="card bg-light mb-3">
-    <div class="card-body">
-      <h5 class="card-title">Total Penjualan Keseluruhan</h5>
-      <p class="card-text fw-bold">Rp {{ number_format($totalDailySales ?? 0, 0, ',', '.') }}</p>
+    {{-- Detail Transaksi --}}
+    <div class="card shadow-sm border-0">
+    <div class="card-header bg-white p-3">
+      <div class="d-flex justify-content-between align-items-center">
+      <h6 class="mb-0 fw-bold">
+        <i class="fas fa-list-ul me-2"></i>Detail Transaksi Penjualan untuk
+        {{ \Carbon\Carbon::parse($filterDate ?? today())->isoFormat('DD MMMM YYYY') }}
+      </h6>
+      <div class="input-group input-group-sm" style="max-width: 250px;">
+        <span class="input-group-text bg-light border-end-0">
+        <i class="fas fa-search text-muted"></i>
+        </span>
+        <input type="text" id="custom-search-input" class="form-control border-start-0" placeholder="Cari invoice...">
+      </div>
+      </div>
     </div>
-    </div>
-
-    @if ($salesToday && $salesToday->count() > 0)
-    <div class="card">
-    <div class="card-header">
-      Detail Transaksi Penjualan ({{ $filterDate ?? today()->toDateString() }})
-    </div>
-    <div class="card-body">
-      <table class="table table-sm table-striped">
-      <thead>
+    <div class="card-body p-0">
+      @if ($salesToday && $salesToday->count() > 0)
+      <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" id="daily-sales-table">
+      <thead class="table-light">
       <tr>
-      <th>No</th>
-      <th>Invoice</th>
-      <th>Tanggal</th>
-      <th>Nama Barang</th>
-      <th>Kategori</th>
-      <th>Total</th>
-      <th>Detail</th>
+        <th class="text-center" width="5%">No.</th>
+        <th>Invoice</th>
+        <th>Waktu</th>
+        <th>Pelanggan</th>
+        <th>Kasir</th>
+        <th class="text-center">Jml. Item</th>
+        <th class="text-end">Total Transaksi</th>
+        <th class="text-center" width="10%">Aksi</th>
       </tr>
       </thead>
       <tbody>
-      @foreach ($salesToday as $key => $sale)
-      @foreach ($sale->items as $saleItem)
+      @foreach ($salesToday as $sale)
       <tr>
-      <td>{{ $key + 1 }}</td>
-      <td>{{ $sale->invoice_number }}</td>
-      <td>{{ $sale->sale_date->format('d-m-Y H:i') }}</td>
-      <td>{{ $saleItem->item_name }}</td>
-      <td>{{ $saleItem->item->category->name ?? '-' }}</td>
-      <td>Rp {{ number_format($saleItem->quantity * $saleItem->unit_price, 0, ',', '.') }}</td>
-      <td>
-      <a href="{{ route('penjualan.transaksi.show', $sale) }}" class="btn btn-sm btn-info">Detail</a>
+      <td data-label="No." class="text-center">{{ $loop->iteration }}</td>
+      <td data-label="Invoice"><span class="fw-bold text-primary">{{ $sale->invoice_number }}</span></td>
+      <td data-label="Waktu">{{ $sale->sale_date->format('H:i') }}</td>
+      <td data-label="Pelanggan">{{ $sale->customer_name ?? 'Umum' }}</td>
+      <td data-label="Kasir">{{ $sale->user->name }}</td>
+      <td data-label="Jml. Item" class="text-center">
+      <span class="badge bg-secondary-subtle text-secondary-emphasis" data-bs-toggle="tooltip"
+      title="{{ $sale->items->pluck('item_name')->join(', ') }}">
+      {{ $sale->items->sum('quantity') }}
+      </span>
+      </td>
+      <td data-label="Total" class="text-end fw-bold">Rp {{ number_format($sale->grand_total, 0, ',', '.') }}
+      </td>
+      <td data-label="Aksi" class="text-center">
+      <a href="{{ route('penjualan.transaksi.show', $sale) }}" class="btn btn-sm btn-outline-primary btn-icon"
+      data-bs-toggle="tooltip" title="Lihat Detail">
+      <i class="fas fa-eye"></i>
+      </a>
       </td>
       </tr>
       @endforeach
-      @endforeach
       </tbody>
-      <tfoot>
-      <tr class="fw-bold">
-      <td colspan="5" class="text-end">Total Seluruh Transaksi:</td>
-      <td>Rp {{ number_format($salesToday->sum('grand_total'), 0, ',', '.') }}</td>
-      <td></td>
-      </tr>
-      </tfoot>
       </table>
-    </div>
-    </div>
+      </div>
     @else
-    <div class="alert alert-info">Tidak ada transaksi penjualan pada tanggal {{ $filterDate ?? today()->toDateString() }}.
-    </div>
+      <div class="text-center py-5 text-muted">
+      <i class="fas fa-folder-open fa-3x mb-3"></i>
+      <p class="mb-0">Tidak ada transaksi pada tanggal ini.</p>
+      </div>
     @endif
+    </div>
+    </div>
   </div>
 @endsection
+
+@push('styles')
+  <style>
+    .text-gradient {
+    background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    }
+
+    .stat-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+    }
+
+    .table th {
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    }
+
+    .table td {
+    padding: 0.9rem 1rem;
+    vertical-align: middle;
+    font-size: 0.8rem;
+    }
+
+    .btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    }
+
+    @media (max-width: 768px) {
+    .table thead {
+      display: none;
+    }
+
+    .table tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #dee2e6;
+      border-radius: .5rem;
+      box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+    }
+
+    .table td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #f0f0f0;
+      padding: 0.75rem 1rem;
+    }
+
+    .table td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: #6c757d;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+
+    .table td:last-child {
+      border-bottom: 0;
+    }
+    }
+  </style>
+@endpush
+
+@push('scripts')
+  <script>
+    $(document).ready(function () {
+    if ($('#daily-sales-table tbody tr').length > 1 || ($('#daily-sales-table tbody tr').length === 1 && $('#daily-sales-table tbody tr td').length > 1)) {
+      var table = $('#daily-sales-table').DataTable({
+      paging: true,
+      lengthChange: false,
+      searching: true,
+      info: true,
+      ordering: true,
+      autoWidth: false,
+      responsive: false,
+      dom: 'rt<"d-flex justify-content-between align-items-center p-3"ip>',
+      language: {
+        search: "_INPUT_",
+        searchPlaceholder: "Cari...",
+        zeroRecords: "Data tidak ditemukan.",
+        info: "Menampilkan _START_ - _END_ dari _TOTAL_ transaksi",
+        infoEmpty: "Menampilkan 0 transaksi",
+        paginate: { next: "›", previous: "‹" }
+      },
+      columnDefs: [
+        { orderable: false, targets: [0, 7] }
+      ]
+      });
+
+      $('#custom-search-input').on('keyup', function () {
+      table.search(this.value).draw();
+      });
+    }
+
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    });
+  </script>
+@endpush

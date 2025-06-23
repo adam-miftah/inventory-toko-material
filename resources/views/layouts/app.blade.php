@@ -5,14 +5,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>{{ config('TB. SOGOL ANUGRAH MANDIRI', 'TB. SOGOL ANUGRAH MANDIRI') }} - @yield('title')</title>
+  <title>{{ config('app.name', 'TB. SOGOL ANUGRAH MANDIRI') }} - @yield('title')</title>
+
+  {{-- Library Font & Ikon --}}
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  {{-- Library CSS Pihak Ketiga --}}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+  <link rel="icon" href="{{ asset('sogol.ico') }}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
   <style>
     :root {
       --primary: #06609CFF;
@@ -111,11 +119,6 @@
       transition: all 0.3s;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      border: none;
-    }
-
     .sidebar-divider {
       height: 2px;
       background-color: rgba(255, 255, 255, 0.2);
@@ -173,6 +176,15 @@
     .sidebar-submenu .sidebar-link {
       padding: 8px 15px 8px 40px;
       font-size: 14px;
+    }
+
+    #nprogress .bar {
+      background: var(--primary) !important;
+      height: 3px !important;
+    }
+
+    #nprogress .peg {
+      box-shadow: 0 0 10px var(--primary), 0 0 5px var(--primary) !important;
     }
 
     /* Responsive */
@@ -322,12 +334,6 @@
 </head>
 
 <body class="bg-light">
-  <!-- Loading Overlay -->
-  <div id="loading-overlay">
-    <div class="spinner"></div>
-    <p class="mt-3 text-muted">Memuat Sistem...</p>
-  </div>
-
   <!-- Backdrop for mobile sidebar -->
   <div class="sidebar-backdrop"></div>
 
@@ -352,122 +358,122 @@
       @include('layouts.footer')
     </div>
   </div>
-
-  <!-- Scripts -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  {{-- Library JavaScript Pihak Ketiga --}}
+  <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
   <script>
-    // Hide loading overlay when page is loaded
-    window.addEventListener('load', function () {
-      setTimeout(function () {
-        document.getElementById('loading-overlay').style.opacity = '0';
-        setTimeout(function () {
-          document.getElementById('loading-overlay').style.display = 'none';
-        }, 300);
-      }, 500);
-    });
+    // Semua skrip dijalankan setelah DOM siap menggunakan jQuery.
+    $(document).ready(function () {
 
-    // Mobile sidebar toggle
-    document.addEventListener('DOMContentLoaded', function () {
-      const sidebar = document.querySelector('.sidebar');
-      const sidebarToggle = document.getElementById('sidebarToggle');
-      const sidebarClose = document.getElementById('sidebarClose');
-      const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
+      NProgress.configure({ showSpinner: false });
 
-      // Toggle sidebar on mobile
-      sidebarToggle.addEventListener('click', function () {
-        sidebar.classList.add('show');
-        sidebarBackdrop.style.display = 'block';
-        document.body.style.overflow = 'hidden';
+      // Mulai loading bar saat halaman mulai dimuat
+      NProgress.start();
+
+      // Selesaikan loading bar setelah semua elemen halaman (termasuk gambar) selesai dimuat
+      $(window).on('load', function () {
+        NProgress.done();
+      });
+      $(document).on('click', 'a[href]:not([href^="#"]):not([target="_blank"])', function (e) {
+        // Jika user menekan Ctrl atau Cmd (untuk membuka di tab baru), jangan tampilkan bar
+        if (e.ctrlKey || e.metaKey) {
+          return;
+        }
+        NProgress.start();
       });
 
-      // Close sidebar
-      sidebarClose.addEventListener('click', function () {
-        sidebar.classList.remove('show');
-        sidebarBackdrop.style.display = 'none';
-        document.body.style.overflow = '';
+      // Tampilkan loading bar setiap kali form di-submit
+      $(document).on('submit', 'form', function () {
+        NProgress.start();
       });
+      // --- AUTO-CLOSE SUCCESS ALERT ---
+      const successAlert = document.querySelector('.alert-success');
+      if (successAlert) {
+        setTimeout(() => {
+          const bsAlert = new bootstrap.Alert(successAlert);
+          bsAlert.close();
+        }, 3000);
+      }
 
-      // Close sidebar when clicking on backdrop
-      sidebarBackdrop.addEventListener('click', function () {
-        sidebar.classList.remove('show');
-        sidebarBackdrop.style.display = 'none';
-        document.body.style.overflow = '';
-      });
 
-      // Close dropdown menus when clicking outside
-      document.addEventListener('click', function (e) {
-        if (!e.target.closest('.dropdown') && !e.target.classList.contains('dropdown-toggle')) {
-          const dropdowns = document.querySelectorAll('.dropdown-menu');
-          dropdowns.forEach(function (dropdown) {
-            if (dropdown.classList.contains('show')) {
-              dropdown.classList.remove('show');
-            }
+      // --- GLOBAL AJAX ERROR HANDLING ---
+      $(document).ajaxError(function (event, jqxhr, settings, thrownError) {
+        if (jqxhr.status === 419) { // CSRF token mismatch
+          Swal.fire({
+            title: 'Sesi Habis',
+            text: 'Sesi Anda telah berakhir. Harap segarkan halaman.',
+            icon: 'warning',
+            confirmButtonText: 'Segarkan Halaman'
+          }).then(() => {
+            window.location.reload();
+          });
+        } else if (jqxhr.status >= 500) { // Server Error
+          Swal.fire({
+            title: 'Kesalahan Server',
+            text: 'Terjadi kesalahan tak terduga di server. Silakan coba lagi nanti.',
+            icon: 'error'
           });
         }
       });
 
-      // Add active class to current route
-      const currentPath = window.location.pathname;
-      const sidebarLinks = document.querySelectorAll('.sidebar-link');
 
-      sidebarLinks.forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-          link.classList.add('active');
-          // Expand parent collapse if exists
+      // --- SIDEBAR LOGIC ---
+      const sidebar = $('.sidebar');
+      const sidebarBackdrop = $('.sidebar-backdrop');
+
+      // Tampilkan sidebar
+      $('#sidebarToggle').on('click', function () {
+        sidebar.addClass('show');
+        sidebarBackdrop.fadeIn(200);
+        $('body').css('overflow', 'hidden');
+      });
+
+      // Fungsi untuk menyembunyikan sidebar
+      function hideSidebar() {
+        sidebar.removeClass('show');
+        sidebarBackdrop.fadeOut(200);
+        $('body').css('overflow', '');
+      }
+
+      // Sembunyikan sidebar saat klik tombol close atau backdrop
+      $('#sidebarClose, .sidebar-backdrop').on('click', hideSidebar);
+
+
+      // --- SIDEBAR ACTIVE LINK ---
+      const currentPath = window.location.pathname;
+      $('.sidebar-link').each(function () {
+        const link = $(this);
+        if (link.attr('href') === currentPath) {
+          link.addClass('active');
           const parentCollapse = link.closest('.collapse');
-          if (parentCollapse) {
-            parentCollapse.classList.add('show');
+          if (parentCollapse.length) {
+            parentCollapse.addClass('show');
+            // Tandai juga link parent-nya sebagai aktif
+            parentCollapse.prev('.sidebar-link').addClass('active');
           }
         }
       });
 
-      // Custom JavaScript to close other open collapses when one is toggled
-      document.querySelectorAll('.sidebar-link[data-bs-toggle="collapse"]').forEach(function (element) {
-        element.addEventListener('click', function () {
-          const targetId = this.getAttribute('href');
-          document.querySelectorAll('.collapse.show').forEach(function (openCollapse) {
-            if ('#' + openCollapse.id !== targetId) {
-              const bsCollapse = new bootstrap.Collapse(openCollapse, {
-                toggle: false
-              });
-              bsCollapse.hide();
-            }
-          });
+      // Menutup submenu lain saat satu submenu dibuka
+      $('.sidebar-link[data-bs-toggle="collapse"]').on('click', function () {
+        const targetCollapse = $($(this).attr('href'));
+        $('.collapse.show').not(targetCollapse).each(function () {
+          const bsCollapse = new bootstrap.Collapse(this, { toggle: false });
+          bsCollapse.hide();
         });
       });
-    });
 
-    // Global error handling for AJAX requests
-    $(document).ajaxError(function (event, jqxhr, settings, thrownError) {
-      if (jqxhr.status === 419) { // CSRF token mismatch
-        Swal.fire({
-          title: 'Session Expired',
-          text: 'Your session has expired. Please refresh the page.',
-          icon: 'error',
-          confirmButtonText: 'Refresh'
-        }).then(() => {
-          window.location.reload();
-        });
-      } else if (jqxhr.status === 500) {
-        Swal.fire({
-          title: 'Server Error',
-          text: 'An unexpected error occurred. Please try again later.',
-          icon: 'error'
-        });
-      }
     });
   </script>
-
   @stack('scripts')
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-  <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
-  <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 </body>
 
 </html>

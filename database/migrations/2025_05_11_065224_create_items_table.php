@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,12 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('items', function (Blueprint $table) {
-            $table->id(); // Ini akan menjadi ID yang otomatis naik
+            $table->id();
             $table->string('name');
-            $table->decimal('price', 10, 2);
-            $table->string('unit'); // Satuan (contoh: pcs, kg, meter)
+            // PERBAIKAN: Menambahkan kolom purchase_price (Harga Modal)
+            $table->decimal('purchase_price', 10, 2)->nullable()->default(0); // Harga Modal
+            $table->decimal('price', 10, 2); // Harga Jual
+            $table->string('unit')->nullable(); // Satuan dibuat nullable
             $table->integer('stock');
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // Foreign key ke categories
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->text('description')->nullable();
+
+            // Kolom spesifik (dibuat nullable agar fleksibel)
+            $table->string('color_name', 100)->nullable();
+            $table->string('color_code', 50)->nullable();
+            $table->string('paint_type', 100)->nullable();
+            $table->string('volume', 50)->nullable();
+            $table->string('size', 100)->nullable();
+            $table->string('texture', 100)->nullable();
+            $table->string('motif', 100)->nullable();
+            $table->string('grade', 50)->nullable();
+            $table->string('finish_type', 100)->nullable();
+            
             $table->timestamps();
         });
     }

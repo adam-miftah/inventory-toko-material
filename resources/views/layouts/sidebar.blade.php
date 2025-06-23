@@ -11,7 +11,6 @@
   </div>
   <div class="sidebar-divider"></div>
   <div class="sidebar-menu p-1">
-    <!-- Dashboard -->
     <div class="sidebar-item">
       <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
         <span class="sidebar-icon"><i class="fas fa-tachometer-alt"></i></span>
@@ -19,7 +18,6 @@
       </a>
     </div>
 
-    <!-- Inventory -->
     <div class="sidebar-item">
       <a href="#inventoryMenu" class="sidebar-link {{ request()->is('inventory*') ? '' : 'collapsed' }}"
         data-bs-toggle="collapse">
@@ -29,31 +27,21 @@
       </a>
       <div class="collapse {{ request()->is('inventory*') ? 'show' : '' }}" id="inventoryMenu">
         <div class="sidebar-submenu">
-          <a href="{{ route('inventory.items') }}"
-            class="sidebar-link {{ request()->routeIs('inventory.items') ? 'active' : '' }}">
+          <a href="{{ route('inventory.items.index') }}"
+            class="sidebar-link {{ request()->routeIs('inventory.items.*') ? 'active' : '' }}">
             <span class="sidebar-icon"><i class="fas fa-list"></i></span>
             <span class="sidebar-text">Daftar Barang</span>
           </a>
-          <a href="{{ route('inventory.categories') }}"
-            class="sidebar-link {{ request()->routeIs('inventory.categories') ? 'active' : '' }}">
+          {{-- KODE DI BAWAH INI TELAH DIPERBARUI --}}
+          <a href="{{ route('inventory.categories.index') }}"
+            class="sidebar-link {{ request()->routeIs('inventory.categories.*') ? 'active' : '' }}">
             <span class="sidebar-icon"><i class="fas fa-tags"></i></span>
             <span class="sidebar-text">Jenis Barang</span>
           </a>
-          {{-- <a href="{{ route('inventory.stock_opname.index') }}"
-            class="sidebar-link {{ request()->routeIs('inventory.stock_opname.*') ? 'active' : '' }}">
-            <span class="sidebar-icon"><i class="fas fa-exchange-alt"></i></span>
-            <span class="sidebar-text">Stok Opname</span>
-          </a>
-          <a href="{{ route('inventory.reports.current_stock') }}"
-            class="sidebar-link {{ request()->routeIs('inventory.reports.current_stock') ? 'active' : '' }}">
-            <span class="sidebar-icon"><i class="fas fa-chart-line"></i></span>
-            <span class="sidebar-text">Laporan Stok</span>
-          </a> --}}
         </div>
       </div>
     </div>
 
-    <!-- Penjualan -->
     <div class="sidebar-item">
       <a href="#salesMenu" class="sidebar-link {{ request()->is('penjualan*') ? '' : 'collapsed' }}"
         data-bs-toggle="collapse">
@@ -82,15 +70,16 @@
       </div>
     </div>
 
-    <!-- Pembelian -->
     <div class="sidebar-item">
-      <a href="#purchaseMenu" class="sidebar-link {{ request()->is('pembelian*') ? '' : 'collapsed' }}"
+      <a href="#purchaseMenu"
+        class="sidebar-link {{ request()->is('pembelian*', 'retur-pembelian*', 'suppliers*') ? '' : 'collapsed' }}"
         data-bs-toggle="collapse">
         <span class="sidebar-icon"><i class="fas fa-truck"></i></span>
         <span class="sidebar-text">Pembelian</span>
         <span class="ms-auto"><i class="fas fa-chevron-down"></i></span>
       </a>
-      <div class="collapse {{ request()->is('pembelian*', 'retur-pembelian*') ? 'show' : '' }}" id="purchaseMenu">
+      <div class="collapse {{ request()->is('pembelian*', 'retur-pembelian*', 'suppliers*') ? 'show' : '' }}"
+        id="purchaseMenu">
         <div class="sidebar-submenu">
           <a href="{{ route('pembelian.create') }}"
             class="sidebar-link {{ request()->routeIs('pembelian.create') ? 'active' : '' }}">
@@ -107,11 +96,15 @@
             <span class="sidebar-icon"><i class="fas fa-exchange-alt"></i></span>
             <span class="sidebar-text">Retur Pembelian</span>
           </a>
+          <a href="{{ route('suppliers.index') }}"
+            class="sidebar-link {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
+            <span class="sidebar-icon"><i class="fas fa-users"></i></span>
+            <span class="sidebar-text">Suppliers</span>
+          </a>
         </div>
       </div>
     </div>
 
-    <!-- Laporan -->
     <div class="sidebar-item">
       <a href="#reportsMenu" class="sidebar-link {{ request()->is('reports*') ? '' : 'collapsed' }}"
         data-bs-toggle="collapse">
@@ -140,7 +133,6 @@
       </div>
     </div>
 
-    <!-- Pengaturan -->
     <div class="sidebar-item">
       <a href="#settingsMenu" class="sidebar-link {{ request()->is('settings*') ? '' : 'collapsed' }}"
         data-bs-toggle="collapse">
@@ -155,8 +147,8 @@
             <span class="sidebar-icon"><i class="fas fa-users"></i></span>
             <span class="sidebar-text">Manajemen User</span>
           </a>
-          <a href="{{ route('settings.company.edit') }}"
-            class="sidebar-link {{ request()->routeIs('settings.company') ? 'active' : '' }}">
+          <a href="{{ route('settings.company.index') }}"
+            class="sidebar-link {{ request()->routeIs('settings.company.index') ? 'active' : '' }}">
             <span class="sidebar-icon"><i class="fas fa-building"></i></span>
             <span class="sidebar-text">Profil Perusahaan</span>
           </a>
@@ -164,19 +156,4 @@
       </div>
     </div>
   </div>
-
-  {{-- <div class="sidebar-footer p-3">
-    <div class="card bg-dark border-0">
-      <div class="card-body p-3 text-center">
-        <div class="mb-2">
-          <i class="fas fa-headset fa-2x text-primary"></i>
-        </div>
-        <h6 class="mb-1">Butuh Bantuan?</h6>
-        <p class="small text-muted mb-2">Hubungi tim support kami</p>
-        <a href="mailto:support@tbsogol.com" class="btn btn-sm btn-primary w-100">
-          <i class="fas fa-envelope me-1"></i> Email
-        </a>
-      </div>
-    </div>
-  </div> --}}
 </div>

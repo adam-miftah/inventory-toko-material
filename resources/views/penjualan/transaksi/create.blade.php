@@ -3,7 +3,7 @@
 @section('title', 'Transaksi Penjualan Baru')
 
 @section('content')
-  <div class="container-fluid py-0">
+  <div class="container-fluidpy-0">
     <!-- Header -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
@@ -60,7 +60,7 @@
         <div class="input-group">
           <span class="input-group-text"><i class="fas fa-user"></i></span>
           <input type="text" class="form-control" id="customer_name" name="customer_name"
-          value="{{ old('customer_name') }}" placeholder="Nama Pelanggan (Opsional)">
+          value="{{ old('customer_name') }}" placeholder="Nama Pelanggan (Wajib Diisi)">
         </div>
         </div>
         <div class="col-md-6">
@@ -207,7 +207,6 @@
 @endsection
 
 @push('styles')
-  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <style>
     .card {
     border-radius: 10px;
@@ -296,7 +295,6 @@
 @endpush
 
 @push('scripts')
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script>
     $(document).ready(function () {
     // Initialize Select2 with search

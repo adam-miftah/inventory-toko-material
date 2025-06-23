@@ -13,7 +13,7 @@ class ReturPembelianController extends Controller
 {
     public function index()
     {
-        $returPembelians = ReturPembelian::latest()->with('pembelian', 'items')->paginate(10);
+        $returPembelians = ReturPembelian::latest()->with('pembelian', 'items')->get();
     return view('retur-pembelian.index', compact('returPembelians'));
     }
 
@@ -23,7 +23,9 @@ class ReturPembelianController extends Controller
         return view('retur-pembelian.create', compact('pembelians'));
     }
 
-    public function store(Request $request)
+    // app/Http/Controllers/ReturPembelianController.php
+
+public function store(Request $request)
     {
         $request->validate([
             'pembelian_id' => 'required|exists:pembelians,id',
@@ -38,13 +40,23 @@ class ReturPembelianController extends Controller
 
         DB::beginTransaction();
         try {
+            // ======================================================
+            // PERBAIKAN 1: Buat Retur Pembelian terlebih dahulu tanpa items
+            // untuk mendapatkan ID-nya.
+            // ======================================================
             $returPembelian = ReturPembelian::create([
                 'pembelian_id' => $request->pembelian_id,
                 'retur_date' => $request->retur_date,
                 'notes' => $request->notes,
-                'total_returned_amount' => 0, // Will be updated later
+                'return_number' => 'TEMP', // Isi sementara
+                'total_returned_amount' => 0,
                 'user_id' => Auth::id(),
             ]);
+
+            // ======================================================
+            // PERBAIKAN 2: Buat nomor retur unik menggunakan ID
+            // ======================================================
+            $returnNumber = 'RTR-' . now()->format('Ymd') . '-' . $returPembelian->id;
 
             $totalReturnedAmount = 0;
             foreach ($request->input('items') as $itemData) {
@@ -63,19 +75,25 @@ class ReturPembelianController extends Controller
                     'subtotal_returned' => $subtotalReturned,
                 ]);
 
-                // Update stok barang (kurangi stok karena retur)
-                $item = $pembelianItem->item;
-                $item->decrement('stock', $itemData['quantity']);
+                // Kurangi stok barang
+                $pembelianItem->item->decrement('stock', $itemData['quantity']);
             }
 
-            $returPembelian->update(['total_returned_amount' => $totalReturnedAmount]);
+            // ======================================================
+            // PERBAIKAN 3: Update data dengan nomor retur dan total yang benar
+            // ======================================================
+            $returPembelian->update([
+                'return_number' => $returnNumber,
+                'total_returned_amount' => $totalReturnedAmount
+            ]);
 
             DB::commit();
             return redirect()->route('retur-pembelian.index')->with('success', 'Retur pembelian berhasil disimpan.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan saat menyimpan retur pembelian.'])->withInput();
+            // Tambahkan pesan error yang lebih detail untuk debugging
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])->withInput();
         }
     }
 
