@@ -1,0 +1,31 @@
+# Blueprint Konfigurasi untuk Render
+
+databases:
+  # Bagian ini mendefinisikan database kita
+  - name: db-inventory # Nama untuk database Anda
+    databaseName: inventory_o9sd # Nama database internal
+    user: material # Username database
+    plan: free # Paket gratis
+
+services:
+  # Bagian ini mendefinisikan Web Service (aplikasi Laravel) kita
+  - type: web
+    name: inventory-toko-material # Nama aplikasi Anda
+    runtime: php # PENTING: Memaksa Render menggunakan runtime PHP
+    plan: free # Paket gratis
+    branch: main # Branch Git yang di-deploy
+    buildCommand: "composer install --optimize-autoloader --no-dev; php artisan config:cache; php artisan route:cache"
+    startCommand: "heroku-php-apache2 public/"
+    envVars:
+      - key: APP_KEY
+        value: "base64:1GccOh1rt21SJl9AY8NL2KMy/kLOaOuF8RoKgZkwMVc=" # GANTI DENGAN APP_KEY ANDA JIKA BERBEDA
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DATABASE_URL # Ini akan otomatis terhubung ke database di atas
+        fromDatabase:
+          name: db-inventory # Harus sama dengan 'name' database di atas
+          property: connectionString

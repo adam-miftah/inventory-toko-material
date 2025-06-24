@@ -1,0 +1,212 @@
+/* public/css/style.css */
+
+/* --- 1. Variabel Warna & Font Modern --- */
+:root {
+    --primary: #0d6efd; /* Biru Bootstrap 5 yang cerah */
+    --secondary: #6c757d;
+    --success: #198754;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --info: #0dcaf0;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --body-bg: #f4f6f9; /* Latar belakang body yang sangat lembut */
+    --border-color: #dee2e6;
+    --sidebar-bg: #111827; /* Sidebar gelap yang elegan */
+    --sidebar-color: rgba(233, 236, 239, 0.7);
+    --sidebar-color-active: #ffffff;
+    --sidebar-width: 250px;
+    --topbar-height: 60px;
+    --font-family-sans-serif: 'Poppins', sans-serif;
+    --box-shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
+    --box-shadow: 0 .5rem 1rem rgba(0,0,0,.1);
+    --border-radius: 0.375rem;
+}
+
+/* --- 2. Pengaturan Dasar & Tipografi --- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--body-bg);
+    font-family: var(--font-family-sans-serif);
+    color: var(--dark);
+    overflow-x: hidden;
+}
+
+/* --- 3. Struktur Layout Utama --- */
+.wrapper {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex-grow: 1;
+    transition: margin-left 0.3s ease-in-out;
+    padding-top: var(--topbar-height);
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    padding: 1.5rem;
+    flex: 1;
+}
+
+/* --- 4. Desain Sidebar Modern --- */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    color: var(--sidebar-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1030;
+    transition: transform 0.3s ease-in-out;
+    box-shadow: var(--box-shadow);
+    overflow-y: auto;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: var(--sidebar-color);
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    transition: background-color 0.2s, color 0.2s;
+    margin: 0.15rem 0.5rem;
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--sidebar-color-active);
+}
+
+.sidebar-link.active {
+    background-color: var(--primary);
+    color: var(--sidebar-color-active);
+    font-weight: 500;
+}
+
+.sidebar-submenu .sidebar-link {
+    padding-left: 2.75rem;
+    font-size: 0.9em;
+}
+
+.sidebar-submenu .sidebar-link.active {
+    background: none;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* --- 5. Navbar / Topbar Bersih --- */
+.navbar {
+    height: var(--topbar-height);
+    box-shadow: var(--box-shadow-sm);
+    position: sticky; /* Modern: Tetap di atas saat scroll */
+    top: 0;
+    z-index: 1020;
+    background-color: #ffffff;
+}
+
+/* --- 6. Desain Kartu (Card) yang Lebih Bersih --- */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-sm);
+    transition: box-shadow 0.3s, transform 0.3s;
+    margin-bottom: 1.5rem;
+    background-color: #fff;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.25rem 1rem rgba(0,0,0,.12);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+}
+
+/* --- 7. Tombol Modern & Halus --- */
+.btn {
+    border-radius: var(--border-radius);
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    border: none;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-1px);
+}
+
+/* --- 8. Desain Responsif --- */
+@media (max-width: 991.98px) {
+    .sidebar {
+        transform: translateX(calc(-1 * var(--sidebar-width)));
+    }
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+/* --- 9. Custom Scrollbar --- */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #ced4da;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+}
+
+/* --- 10. Loading Overlay & Backdrop --- */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(2px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    transition: opacity 0.3s;
+}
+
+.sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1029; /* Di bawah sidebar */
+    display: none;
+}
