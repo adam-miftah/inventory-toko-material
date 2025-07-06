@@ -1,7 +1,7 @@
 <div class="sidebar">
   <div class="sidebar-header p-3 d-flex align-items-center justify-content-between">
     <div class="d-flex align-items-center" style="font-size: 12px; margin-top: -10px;">
-      <img src="{{ asset('images/newstruk.png') }}" alt="Logo" style="width: 50px; height: 50px;">
+      <img src="{{ asset('logo.png') }}" alt="Logo" style="width: 50px; height: 50px;">
       <span class="ms-2 fw-bold d-none d-md-inline">TB. SOGOL ANUGRAH MANDIRI</span>
       <hr>
     </div>

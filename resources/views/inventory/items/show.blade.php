@@ -13,7 +13,7 @@
                 <a href="{{ route('inventory.items.edit', $item->id) }}" class="btn btn-warning btn-sm">
                     <i class="fas fa-edit me-1"></i> Edit
                 </a>
-                <a href="{{ route('inventory.items.index') }}" class="btn btn-outline-secondary btn-sm">
+                <a href="{{ route('inventory.items.index') }}" class="btn btn-secondary btn-sm">
                     <i class="fas fa-arrow-left me-1"></i> Kembali
                 </a>
             </div>

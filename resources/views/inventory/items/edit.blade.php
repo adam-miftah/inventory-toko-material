@@ -230,7 +230,7 @@
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-success"><i class="fas fa-save me-2"></i>Simpan
                                     Perubahan</button>
-                                <a href="{{ route('inventory.items.index') }}" class="btn btn-outline-secondary">Batal</a>
+                                <a href="{{ route('inventory.items.index') }}" class="btn btn-secondary">Batal</a>
                             </div>
                         </div>
                     </div>

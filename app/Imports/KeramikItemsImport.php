@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 
-class KeramikItemsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure
+class KeramikItemsImport implements ToModel, WithHeadingRow, WithValidation
 {
     use SkipsFailures;
 
@@ -29,8 +29,8 @@ class KeramikItemsImport implements ToModel, WithHeadingRow, WithValidation, Ski
         return new Item([
             'category_id'    => $this->category->id,
             'name'           => $row['nama'],
-            'size'           => $row['ukuran'],
-            'purchase_price' => $row['harga_modal'],
+            'size'           => $row['ukuran'] ?? null,
+            'purchase_price' => $row['harga_modal'] ?? null,
             'price'          => $row['harga_jual'],
             'stock'          => $row['stok'],
             'unit'           => $row['satuan'],

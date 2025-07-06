@@ -90,15 +90,13 @@
                                     </td>
                                     <td data-label="Aksi" class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
-                                            <a href="{{ route('pembelian.show', $pembelian) }}"
-                                                class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Detail"><i
-                                                    class="fas fa-eye"></i></a>
-                                            <a href="{{ route('pembelian.edit', $pembelian) }}"
-                                                class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Edit"><i
-                                                    class="fas fa-edit"></i></a>
-                                            <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
+                                            <a href="{{ route('pembelian.show', $pembelian) }}" class="btn btn-sm btn-info"
+                                                data-bs-toggle="tooltip" title="Detail"><i class="fas fa-eye"></i></a>
+                                            <a href="{{ route('pembelian.edit', $pembelian) }}" class="btn btn-sm btn-warning"
+                                                data-bs-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
+                                            {{-- <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
                                                 data-form-id="delete-form-{{ $pembelian->id }}" data-bs-toggle="tooltip"
-                                                title="Hapus"><i class="fas fa-trash-alt"></i></button>
+                                                title="Hapus"><i class="fas fa-trash-alt"></i></button> --}}
                                             <form id="delete-form-{{ $pembelian->id }}"
                                                 action="{{ route('pembelian.destroy', $pembelian) }}" method="POST"
                                                 class="d-none">

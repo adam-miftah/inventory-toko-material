@@ -101,11 +101,11 @@
                                     <td data-label="Aksi" class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
                                             <a href="{{ route('penjualan.transaksi.show', $sale) }}"
-                                                class="btn btn-sm btn-outline-info rounded-circle" data-bs-toggle="tooltip"
+                                                class="btn btn-sm btn-info rounded-circle" data-bs-toggle="tooltip"
                                                 title="Lihat Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <button class="btn btn-sm btn-outline-secondary rounded-circle"
+                                            <button class="btn btn-sm btn-success rounded-circle"
                                                 onclick="printInvoice('{{ $sale->id }}')" data-bs-toggle="tooltip"
                                                 title="Cetak Struk">
                                                 <i class="fas fa-print"></i>

@@ -59,9 +59,9 @@
               class="form-control" name="name" value="{{ old('name') }}"></div>
             {{-- PERBAIKAN: Menambahkan Harga Modal dan Jual --}}
             <div class="col-md-6"><label class="form-label required">Harga Modal</label><input type="number"
-                class="form-control" name="purchase_price" value="{{ old('purchase_price') }}" min="0"></div>
+              class="form-control" name="purchase_price" value="{{ old('purchase_price') }}" min="0"></div>
             <div class="col-md-6"><label class="form-label required">Harga Jual</label><input type="number"
-                class="form-control" name="price" value="{{ old('price') }}" min="0"></div>
+              class="form-control" name="price" value="{{ old('price') }}" min="0"></div>
             <div class="col-md-6"><label class="form-label required">Satuan</label><input type="text"
               class="form-control" name="unit" value="{{ old('unit') }}" placeholder="Contoh: Pcs, Box, Pack">
             </div>
@@ -91,9 +91,9 @@
             </div>
             {{-- PERBAIKAN: Menambahkan Harga Modal dan Jual --}}
             <div class="col-md-6"><label class="form-label required">Harga Modal</label><input type="number"
-                class="form-control" name="purchase_price" value="{{ old('purchase_price') }}" min="0"></div>
+              class="form-control" name="purchase_price" value="{{ old('purchase_price') }}" min="0"></div>
             <div class="col-md-6"><label class="form-label required">Harga Jual</label><input type="number"
-                class="form-control" name="price" value="{{ old('price') }}" min="0"></div>
+              class="form-control" name="price" value="{{ old('price') }}" min="0"></div>
             <div class="col-md-12"><label class="form-label required">Stok</label><input type="number"
               class="form-control" name="stock" value="{{ old('stock') }}" min="0"></div>
             <div class="col-12"><label class="form-label">Deskripsi</label><textarea class="form-control"
@@ -140,7 +140,7 @@
         <div class="card-footer bg-white p-3">
         <div class="d-grid gap-2">
           <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Simpan Barang</button>
-          <a href="{{ route('inventory.items.index') }}" class="btn btn-outline-secondary">Batal</a>
+          <a href="{{ route('inventory.items.index') }}" class="btn btn-secondary">Batal</a>
         </div>
         </div>
       </div>
@@ -195,26 +195,26 @@
 
       let formToShowId = null;
       if (selectedType === 'cat') {
-        formToShowId = 'form-cat';
+      formToShowId = 'form-cat';
       } else if (selectedType === 'keramik') {
-        formToShowId = 'form-keramik';
+      formToShowId = 'form-keramik';
       } else if (selectedType) { // Untuk 'general', 'luar', atau tipe lain
-        formToShowId = 'form-general';
+      formToShowId = 'form-general';
       }
-      
+
       // Sembunyikan semua form dan disable semua inputnya
       dynamicForms.forEach(form => {
-        const formId = form.getAttribute('id');
-        const isTarget = (formId === formToShowId);
-        
-        form.style.display = isTarget ? 'block' : 'none';
-        
-        form.querySelectorAll('input, textarea, select').forEach(input => {
-          // Hanya disable input yang punya 'name' untuk mencegah disable pada elemen tak terduga
-          if(input.name){
-              input.disabled = !isTarget;
-          }
-        });
+      const formId = form.getAttribute('id');
+      const isTarget = (formId === formToShowId);
+
+      form.style.display = isTarget ? 'block' : 'none';
+
+      form.querySelectorAll('input, textarea, select').forEach(input => {
+        // Hanya disable input yang punya 'name' untuk mencegah disable pada elemen tak terduga
+        if (input.name) {
+        input.disabled = !isTarget;
+        }
+      });
       });
     }
 

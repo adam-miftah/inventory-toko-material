@@ -104,7 +104,7 @@
           </div>
           </td>
           <td class="text-end pe-3">
-          <button type="button" class="btn btn-sm btn-outline-danger remove-item"><i
+          <button type="button" class="btn btn-sm btn-danger remove-item"><i
             class="fas fa-trash-alt"></i></button>
           </td>
           </tr>
@@ -141,7 +141,7 @@
         <div class="d-grid gap-2">
           <button type="submit" class="btn btn-success"><i class="fas fa-check-circle me-2"></i>Simpan
           Perubahan</button>
-          <a href="{{ route('pembelian.show', $pembelian) }}" class="btn btn-outline-secondary">Batal</a>
+          <a href="{{ route('pembelian.show', $pembelian) }}" class="btn btn-secondary">Batal</a>
         </div>
         </div>
       </div>
@@ -263,7 +263,7 @@
       </div>
       </td>
       <td class="text-end pe-3">
-      <button type="button" class="btn btn-sm btn-outline-danger remove-item"><i class="fas fa-trash-alt"></i></button>
+      <button type="button" class="btn btn-sm btn-danger remove-item"><i class="fas fa-trash-alt"></i></button>
       </td>
       </tr>`;
 

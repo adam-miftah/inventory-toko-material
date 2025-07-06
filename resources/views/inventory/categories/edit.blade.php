@@ -42,7 +42,7 @@
         </div>
       </div>
       <button type="submit" class="btn btn-success btn-sm">Update</button>
-      <a href="{{ route('inventory.categories.index') }}" class="btn btn-outline-secondary btn-sm">Batal</a>
+      <a href="{{ route('inventory.categories.index') }}" class="btn btn-secondary btn-sm">Batal</a>
       </form>
     </div>
     </div>

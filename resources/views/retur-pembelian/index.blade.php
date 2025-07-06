@@ -93,14 +93,14 @@
         </td>
         <td data-label="Aksi" class="text-center">
         <div class="d-flex justify-content-center gap-2">
-          <a href="{{ route('retur-pembelian.show', $retur) }}" class="btn btn-sm btn-outline-info"
+          <a href="{{ route('retur-pembelian.show', $retur) }}" class="btn btn-sm btn-info"
           data-bs-toggle="tooltip" title="Detail">
           <i class="fas fa-eye"></i>
           </a>
-          <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
+          {{-- <button type="button" class="btn btn-sm btn-danger delete-btn"
           data-form-id="delete-form-{{ $retur->id }}" data-bs-toggle="tooltip" title="Hapus">
           <i class="fas fa-trash-alt"></i>
-          </button>
+          </button> --}}
           <form id="delete-form-{{ $retur->id }}" action="{{ route('retur-pembelian.destroy', $retur) }}"
           method="POST" class="d-none">
           @csrf

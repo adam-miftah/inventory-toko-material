@@ -7,321 +7,250 @@ use App\Models\Sale;
 use App\Models\Pembelian;
 use App\Models\Category;
 use App\Models\SaleReturn;
+use App\Models\ReturPembelian;
+use App\Models\SaleItem;
+use App\Models\SaleReturnItem;
+use App\Models\PembelianItem;
+use App\Models\ReturPembelianItem;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
-   public function dailySales(Request $request)
-{
-    $filterDate = $request->input('date', Carbon::today()->toDateString());
-
-    // Kategori tetap sama
-    $materialCategoryIds = Category::whereIn('name', ['CAT', 'UMUM', 'LUAR'])->pluck('id')->toArray();
-    $keramikCategoryIds = Category::where('name', 'KERAMIK')->pluck('id')->toArray();
-
-    // 1. Hitung Penjualan Kotor (Gross Sales)
-    $grossSalesMaterial = Sale::whereDate('sale_date', $filterDate)
-        ->whereHas('items.item', function ($query) use ($materialCategoryIds) {
-            $query->whereIn('category_id', $materialCategoryIds);
-        })
-        ->sum('grand_total');
-
-    $grossSalesKeramik = Sale::whereDate('sale_date', $filterDate)
-        ->whereHas('items.item', function ($query) use ($keramikCategoryIds) {
-            $query->whereIn('category_id', $keramikCategoryIds);
-        })
-        ->sum('grand_total');
-
-    // 2. Hitung Total Retur untuk hari yang sama
-    $dailyReturnsMaterial = SaleReturn::whereDate('return_date', $filterDate)
-        ->whereHas('items.item', function ($query) use ($materialCategoryIds) {
-            $query->whereIn('category_id', $materialCategoryIds);
-        })
-        ->sum('total_returned_amount');
-
-    $dailyReturnsKeramik = SaleReturn::whereDate('return_date', $filterDate)
-        ->whereHas('items.item', function ($query) use ($keramikCategoryIds) {
-            $query->whereIn('category_id', $keramikCategoryIds);
-        })
-        ->sum('total_returned_amount');
-    
-    $totalDailyReturns = $dailyReturnsMaterial + $dailyReturnsKeramik;
-
-    // 3. Hitung Penjualan Bersih (Net Sales)
-    $netSalesMaterial = $grossSalesMaterial - $dailyReturnsMaterial;
-    $netSalesKeramik = $grossSalesKeramik - $dailyReturnsKeramik;
-    $totalNetDailySales = $netSalesMaterial + $netSalesKeramik;
-
-    // Ambil detail transaksi untuk tabel
-    $salesToday = Sale::whereDate('sale_date', $filterDate)->with('items.item.category')->get();
-
-    // Kirim data yang sudah dihitung ke view
-    return view('reports.daily_sales_categorized', compact(
-        'totalNetDailySales', 
-        'netSalesMaterial', 
-        'netSalesKeramik', 
-        'totalDailyReturns', // <-- Kirim data retur ke view
-        'salesToday', 
-        'filterDate'
-    ));
-}
-
-   public function monthlySales(Request $request)
-{
-    $filterMonth = $request->input('month', Carbon::now()->month);
-    $filterYear = $request->input('year', Carbon::now()->year);
-
-    $materialCategoryIds = Category::whereIn('name', ['CAT', 'UMUM', 'LUAR'])->pluck('id')->toArray();
-    $keramikCategoryIds = Category::where('name', 'KERAMIK')->pluck('id')->toArray();
-
-    // 1. Hitung Penjualan Kotor (Gross Sales) Bulanan
-    $grossSalesMaterial = Sale::whereMonth('sale_date', $filterMonth)
-        ->whereYear('sale_date', $filterYear)
-        ->whereHas('items.item', function ($query) use ($materialCategoryIds) {
-            $query->whereIn('category_id', $materialCategoryIds);
-        })
-        ->sum('grand_total');
-
-    $grossSalesKeramik = Sale::whereMonth('sale_date', $filterMonth)
-        ->whereYear('sale_date', $filterYear)
-        ->whereHas('items.item', function ($query) use ($keramikCategoryIds) {
-            $query->whereIn('category_id', $keramikCategoryIds);
-        })
-        ->sum('grand_total');
-
-    // 2. Hitung Total Retur Bulanan
-    $monthlyReturnsMaterial = SaleReturn::whereMonth('return_date', $filterMonth)
-        ->whereYear('return_date', $filterYear)
-        ->whereHas('items.item', function ($query) use ($materialCategoryIds) {
-            $query->whereIn('category_id', $materialCategoryIds);
-        })
-        ->sum('total_returned_amount');
-
-    $monthlyReturnsKeramik = SaleReturn::whereMonth('return_date', $filterMonth)
-        ->whereYear('return_date', $filterYear)
-        ->whereHas('items.item', function ($query) use ($keramikCategoryIds) {
-            $query->whereIn('category_id', $keramikCategoryIds);
-        })
-        ->sum('total_returned_amount');
-
-    $totalMonthlyReturns = $monthlyReturnsMaterial + $monthlyReturnsKeramik;
-
-    // 3. Hitung Penjualan Bersih (Net Sales)
-    $netSalesMaterial = $grossSalesMaterial - $monthlyReturnsMaterial;
-    $netSalesKeramik = $grossSalesKeramik - $monthlyReturnsKeramik;
-    $totalNetMonthlySales = $netSalesMaterial + $netSalesKeramik;
-
-    // Ambil detail transaksi untuk tabel
-    $salesThisMonth = Sale::whereMonth('sale_date', $filterMonth)
-        ->whereYear('sale_date', $filterYear)
-        ->with('items.item.category')
-        ->get();
-
-    return view('reports.monthly_sales_categorized', compact(
-        'totalNetMonthlySales', 
-        'netSalesMaterial', 
-        'netSalesKeramik', 
-        'totalMonthlyReturns', 
-        'salesThisMonth', 
-        'filterMonth', 
-        'filterYear'
-    ));
-}
-
-   public function profitLoss(Request $request)
-{
-    $filterMonth = $request->input('month', Carbon::now()->month);
-    $filterYear = $request->input('year', Carbon::now()->year);
-
-    $materialCategoryIds = Category::whereIn('name', ['CAT', 'UMUM', 'LUAR'])->pluck('id')->toArray();
-    $keramikCategoryIds = Category::where('name', 'KERAMIK')->pluck('id')->toArray();
-
-    // 1. Total Pendapatan KOTOR (Gross Sales) per Kategori
-    $penjualanMaterial = Sale::whereMonth('sale_date', $filterMonth)
-        ->whereYear('sale_date', $filterYear)
-        ->whereHas('items.item', function ($query) use ($materialCategoryIds) {
-            $query->whereIn('category_id', $materialCategoryIds);
-        })
-        ->sum('grand_total');
-
-    $penjualanKeramik = Sale::whereMonth('sale_date', $filterMonth)
-        ->whereYear('sale_date', $filterYear)
-        ->whereHas('items.item', function ($query) use ($keramikCategoryIds) {
-            $query->whereIn('category_id', $keramikCategoryIds);
-        })
-        ->sum('grand_total');
-
-    // 2. Total Retur Penjualan per Kategori
-    $returMaterial = SaleReturn::whereMonth('return_date', $filterMonth)
-        ->whereYear('return_date', $filterYear)
-        ->whereHas('items.item', function ($query) use ($materialCategoryIds) {
-            $query->whereIn('category_id', $materialCategoryIds);
-        })
-        ->sum('total_returned_amount');
-    
-    $returKeramik = SaleReturn::whereMonth('return_date', $filterMonth)
-        ->whereYear('return_date', $filterYear)
-        ->whereHas('items.item', function ($query) use ($keramikCategoryIds) {
-            $query->whereIn('category_id', $keramikCategoryIds);
-        })
-        ->sum('total_returned_amount');
-
-    // 3. Total Biaya Pembelian per Kategori (HPP)
-    $pembelianMaterial = Pembelian::whereMonth('purchase_date', $filterMonth)
-        ->whereYear('purchase_date', $filterYear)
-        ->whereHas('items.item', function ($query) use ($materialCategoryIds) {
-            $query->whereIn('item_id', function ($subQuery) use ($materialCategoryIds) {
-                $subQuery->select('id')->from('items')->whereIn('category_id', $materialCategoryIds);
-            });
-        })
-        ->sum('total_amount');
-
-    $pembelianKeramik = Pembelian::whereMonth('purchase_date', $filterMonth)
-        ->whereYear('purchase_date', $filterYear)
-        ->whereHas('items.item', function ($query) use ($keramikCategoryIds) {
-            $query->whereIn('item_id', function ($subQuery) use ($keramikCategoryIds) {
-                $subQuery->select('id')->from('items')->whereIn('category_id', $keramikCategoryIds);
-            });
-        })
-        ->sum('total_amount');
-    
-    // 4. Perhitungan Laba Rugi Bersih
-    $labaRugiMaterial = ($penjualanMaterial - $returMaterial) - $pembelianMaterial;
-    $labaRugiKeramik = ($penjualanKeramik - $returKeramik) - $pembelianKeramik;
-    $totalLabaRugi = $labaRugiMaterial + $labaRugiKeramik;
-    
-    // 5. Hitung total untuk kartu ringkasan
-    $totalPendapatan = $penjualanMaterial + $penjualanKeramik;
-    $totalRetur = $returMaterial + $returKeramik;
-    $totalBiayaPembelian = $pembelianMaterial + $pembelianKeramik;
-
-    return view('reports.profit_loss_categorized', compact(
-        'filterMonth', 'filterYear',
-        'penjualanMaterial', 'penjualanKeramik', 'totalPendapatan',
-        'returMaterial', 'returKeramik', 'totalRetur',
-        'pembelianMaterial', 'pembelianKeramik', 'totalBiayaPembelian',
-        'labaRugiMaterial', 'labaRugiKeramik', 'totalLabaRugi'
-    ));
-}
-
-    public function printDailySales(Request $request)
+    /**
+     * Mendapatkan ID kategori berdasarkan tipe.
+     */
+    private function getCategoryIdsByType(): array
     {
-        $filterDate = $request->input('date', Carbon::today()->toDateString());
+        return [
+            'material' => Category::whereIn('type', ['general', 'cat', 'luar'])->pluck('id'),
+            'keramik' => Category::where('type', 'keramik')->pluck('id'),
+        ];
+    }
 
-        $materialCategoryIds = Category::whereIn('name', ['CAT','UMUM','LUAR'])->pluck('id')->toArray();
-        $keramikCategoryIds = Category::where('name', 'KERAMIK')->pluck('id')->toArray();
+    public function dailySales(Request $request)
+    {
+        $filterDate = $request->input('date', today()->toDateString());
+        $categoryIds = $this->getCategoryIdsByType();
 
-        $dailySalesMaterial = Sale::whereDate('sale_date', $filterDate)
-            ->whereHas('items.item', function ($query) use ($materialCategoryIds) {
-                $query->whereIn('category_id', $materialCategoryIds);
-            })
-            ->sum('grand_total');
+        // Penjualan Kotor (menggunakan sale_date)
+        $grossSalesMaterial = SaleItem::whereHas('sale', fn($q) => $q->whereDate('sale_date', $filterDate))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))
+            ->sum('subtotal');
+        $grossSalesKeramik = SaleItem::whereHas('sale', fn($q) => $q->whereDate('sale_date', $filterDate))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))
+            ->sum('subtotal');
 
-        $dailySalesKeramik = Sale::whereDate('sale_date', $filterDate)
-            ->whereHas('items.item', function ($query) use ($keramikCategoryIds) {
-                $query->whereIn('category_id', $keramikCategoryIds);
-            })
-            ->sum('grand_total');
+        // Retur Penjualan (menggunakan return_date DENGAN 'n')
+        $dailyReturnsMaterial = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereDate('return_date', $filterDate))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))
+            ->sum('subtotal');
+        $dailyReturnsKeramik = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereDate('return_date', $filterDate))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))
+            ->sum('subtotal');
 
-        $totalDailySales = $dailySalesMaterial + $dailySalesKeramik;
+        $totalDailyReturns = $dailyReturnsMaterial + $dailyReturnsKeramik;
+        $netSalesMaterial = $grossSalesMaterial - $dailyReturnsMaterial;
+        $netSalesKeramik = $grossSalesKeramik - $dailyReturnsKeramik;
+        $totalNetDailySales = $netSalesMaterial + $netSalesKeramik;
 
-        $salesToday = Sale::whereDate('sale_date', $filterDate)->with('items.item.category')->get();
+        $salesToday = Sale::whereDate('sale_date', $filterDate)->with(['user', 'items.item.category'])->get();
 
-        return view('reports.print.daily_sales', compact('totalDailySales', 'dailySalesMaterial', 'dailySalesKeramik', 'salesToday', 'filterDate'));
+        return view('reports.daily_sales_categorized', compact(
+            'netSalesMaterial', 'netSalesKeramik', 'totalDailyReturns', 'totalNetDailySales', 'salesToday', 'filterDate'
+        ));
+    }
+
+    public function monthlySales(Request $request)
+    {
+        $filterMonth = $request->input('month', now()->month);
+        $filterYear = $request->input('year', now()->year);
+        $categoryIds = $this->getCategoryIdsByType();
+        
+        // Penjualan Kotor
+        $grossSalesMaterial = SaleItem::whereHas('sale', fn($q) => $q->whereMonth('sale_date', $filterMonth)->whereYear('sale_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $grossSalesKeramik = SaleItem::whereHas('sale', fn($q) => $q->whereMonth('sale_date', $filterMonth)->whereYear('sale_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
+
+        // Retur Penjualan (menggunakan return_date DENGAN 'n')
+        $monthlyReturnsMaterial = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereMonth('return_date', $filterMonth)->whereYear('return_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $monthlyReturnsKeramik = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereMonth('return_date', $filterMonth)->whereYear('return_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
+
+        $totalMonthlyReturns = $monthlyReturnsMaterial + $monthlyReturnsKeramik;
+        $netSalesMaterial = $grossSalesMaterial - $monthlyReturnsMaterial;
+        $netSalesKeramik = $grossSalesKeramik - $monthlyReturnsKeramik;
+        $totalNetMonthlySales = $netSalesMaterial + $netSalesKeramik;
+
+        $salesThisMonth = Sale::whereMonth('sale_date', $filterMonth)->whereYear('sale_date', $filterYear)->with(['user', 'items.item.category'])->get();
+
+        return view('reports.monthly_sales_categorized', compact(
+            'netSalesMaterial', 'netSalesKeramik', 'totalMonthlyReturns', 'totalNetMonthlySales', 'salesThisMonth', 'filterMonth', 'filterYear'
+        ));
+    }
+
+    public function profitLoss(Request $request)
+    {
+        $filterMonth = $request->input('month', now()->month);
+        $filterYear = $request->input('year', now()->year);
+        $categoryIds = $this->getCategoryIdsByType();
+
+        // Pendapatan
+        $penjualanMaterial = SaleItem::whereHas('sale', fn($q) => $q->whereMonth('sale_date', $filterMonth)->whereYear('sale_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $penjualanKeramik = SaleItem::whereHas('sale', fn($q) => $q->whereMonth('sale_date', $filterMonth)->whereYear('sale_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
+
+        // Pengurang Pendapatan (Retur Penjualan -> tabel sale_returns -> kolom 'return_date')
+        $returMaterial = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereMonth('return_date', $filterMonth)->whereYear('return_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $returKeramik = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereMonth('return_date', $filterMonth)->whereYear('return_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
+        
+        // Biaya Pokok Penjualan (Pembelian)
+        $pembelianMaterial = PembelianItem::whereHas('pembelian', fn($q) => $q->whereMonth('purchase_date', $filterMonth)->whereYear('purchase_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $pembelianKeramik = PembelianItem::whereHas('pembelian', fn($q) => $q->whereMonth('purchase_date', $filterMonth)->whereYear('purchase_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
+
+        // Pengurang Biaya (Retur Pembelian -> tabel retur_pembelians -> kolom 'retur_date')
+        $returPembelianMaterial = ReturPembelianItem::whereHas('returPembelian', fn($q) => $q->whereMonth('retur_date', $filterMonth)->whereYear('retur_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal_returned');
+        $returPembelianKeramik = ReturPembelianItem::whereHas('returPembelian', fn($q) => $q->whereMonth('retur_date', $filterMonth)->whereYear('retur_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal_returned');
+
+        // Perhitungan Laba Rugi
+        $hppBersihMaterial = $pembelianMaterial - $returPembelianMaterial;
+        $hppBersihKeramik = $pembelianKeramik - $returPembelianKeramik;
+        $labaRugiMaterial = ($penjualanMaterial - $returMaterial) - $hppBersihMaterial;
+        $labaRugiKeramik = ($penjualanKeramik - $returKeramik) - $hppBersihKeramik;
+        
+        // Total
+        $totalPendapatan = $penjualanMaterial + $penjualanKeramik;
+        $totalRetur = $returMaterial + $returKeramik;
+        $totalBiayaPembelian = $pembelianMaterial + $pembelianKeramik;
+        $totalLabaRugi = $labaRugiMaterial + $labaRugiKeramik;
+
+        return view('reports.profit_loss_categorized', compact(
+            'filterMonth', 'filterYear', 'penjualanMaterial', 'penjualanKeramik', 'totalPendapatan',
+            'returMaterial', 'returKeramik', 'totalRetur', 'pembelianMaterial', 'pembelianKeramik',
+            'totalBiayaPembelian', 'labaRugiMaterial', 'labaRugiKeramik', 'totalLabaRugi'
+        ));
+    }
+
+public function printDailySales(Request $request)
+    {
+        // LOGIKA DISAMAKAN DENGAN dailySales UNTUK KONSISTENSI DATA
+        $filterDate = $request->input('date', today()->toDateString());
+        $categoryIds = $this->getCategoryIdsByType();
+
+        $grossSalesMaterial = SaleItem::whereHas('sale', fn($q) => $q->whereDate('sale_date', $filterDate))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $grossSalesKeramik = SaleItem::whereHas('sale', fn($q) => $q->whereDate('sale_date', $filterDate))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
+
+        $dailyReturnsMaterial = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereDate('return_date', $filterDate))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $dailyReturnsKeramik = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereDate('return_date', $filterDate))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
+
+        $totalDailyReturns = $dailyReturnsMaterial + $dailyReturnsKeramik;
+        $netSalesMaterial = $grossSalesMaterial - $dailyReturnsMaterial;
+        $netSalesKeramik = $grossSalesKeramik - $dailyReturnsKeramik;
+        $totalNetDailySales = $netSalesMaterial + $netSalesKeramik;
+
+        $salesToday = Sale::whereDate('sale_date', $filterDate)->with(['user', 'items.item'])->latest()->get();
+
+        $data = compact('netSalesMaterial', 'netSalesKeramik', 'totalDailyReturns', 'totalNetDailySales', 'salesToday', 'filterDate');
+        
+        $pdf = Pdf::loadView('reports.print.daily_sales', $data);
+        return $pdf->stream('laporan-penjualan-harian-' . $filterDate . '.pdf');
     }
 
     public function printMonthlySales(Request $request)
     {
-        $filterMonth = $request->input('month', Carbon::now()->month);
-        $filterYear = $request->input('year', Carbon::now()->year);
+        // LOGIKA DISAMAKAN DENGAN monthlySales UNTUK KONSISTENSI DATA
+        $filterMonth = $request->input('month', now()->month);
+        $filterYear = $request->input('year', now()->year);
+        $categoryIds = $this->getCategoryIdsByType();
+        
+        $grossSalesMaterial = SaleItem::whereHas('sale', fn($q) => $q->whereMonth('sale_date', $filterMonth)->whereYear('sale_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $grossSalesKeramik = SaleItem::whereHas('sale', fn($q) => $q->whereMonth('sale_date', $filterMonth)->whereYear('sale_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
 
-        $materialCategoryIds = Category::whereIn('name', ['CAT','UMUM','LUAR'])->pluck('id')->toArray();
-        $keramikCategoryIds = Category::where('name', 'KERAMIK')->pluck('id')->toArray();
+        $monthlyReturnsMaterial = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereMonth('return_date', $filterMonth)->whereYear('return_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $monthlyReturnsKeramik = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereMonth('return_date', $filterMonth)->whereYear('return_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
 
-        $monthlySalesMaterial = Sale::whereMonth('sale_date', $filterMonth)
-            ->whereYear('sale_date', $filterYear)
-            ->whereHas('items.item', function ($query) use ($materialCategoryIds) {
-                $query->whereIn('category_id', $materialCategoryIds);
-            })
-            ->sum('grand_total');
+        $totalMonthlyReturns = $monthlyReturnsMaterial + $monthlyReturnsKeramik;
+        $netSalesMaterial = $grossSalesMaterial - $monthlyReturnsMaterial;
+        $netSalesKeramik = $grossSalesKeramik - $monthlyReturnsKeramik;
+        $totalNetMonthlySales = $netSalesMaterial + $netSalesKeramik;
 
-        $monthlySalesKeramik = Sale::whereMonth('sale_date', $filterMonth)
-            ->whereYear('sale_date', $filterYear)
-            ->whereHas('items.item', function ($query) use ($keramikCategoryIds) {
-                $query->whereIn('category_id', $keramikCategoryIds);
-            })
-            ->sum('grand_total');
+        $salesThisMonth = Sale::whereMonth('sale_date', $filterMonth)->whereYear('sale_date', $filterYear)->with(['user', 'items.item'])->latest()->get();
 
-        $totalMonthlySales = $monthlySalesMaterial + $monthlySalesKeramik;
+        $data = compact('netSalesMaterial', 'netSalesKeramik', 'totalMonthlyReturns', 'totalNetMonthlySales', 'salesThisMonth', 'filterMonth', 'filterYear');
 
-        $salesThisMonth = Sale::whereMonth('sale_date', $filterMonth)
-            ->whereYear('sale_date', $filterYear)
-            ->with('items.item.category')
-            ->get();
-
-        return view('reports.print.monthly_sales', compact('totalMonthlySales', 'monthlySalesMaterial', 'monthlySalesKeramik', 'salesThisMonth', 'filterMonth', 'filterYear'));
+        $pdf = Pdf::loadView('reports.print.monthly_sales', $data);
+        return $pdf->stream('laporan-penjualan-bulanan-' . $filterYear . '-' . $filterMonth . '.pdf');
     }
 
     public function printProfitLoss(Request $request)
     {
-        $filterMonth = $request->input('month', Carbon::now()->month);
-        $filterYear = $request->input('year', Carbon::now()->year);
+        // LOGIKA DISAMAKAN DENGAN profitLoss UNTUK KONSISTENSI DATA
+        $filterMonth = $request->input('month', now()->month);
+        $filterYear = $request->input('year', now()->year);
+        $categoryIds = $this->getCategoryIdsByType();
 
-        $materialCategoryIds = Category::whereIn('name', ['CAT','UMUM','LUAR'])->pluck('id')->toArray();
-        $keramikCategoryIds = Category::where('name', 'KERAMIK')->pluck('id')->toArray();
+        $penjualanKotorMaterial = SaleItem::whereHas('sale', fn($q) => $q->whereMonth('sale_date', $filterMonth)->whereYear('sale_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $penjualanKotorKeramik = SaleItem::whereHas('sale', fn($q) => $q->whereMonth('sale_date', $filterMonth)->whereYear('sale_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
+        
+        $returPenjualanMaterial = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereMonth('return_date', $filterMonth)->whereYear('return_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $returPenjualanKeramik = SaleReturnItem::whereHas('saleReturn', fn($q) => $q->whereMonth('return_date', $filterMonth)->whereYear('return_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
 
-        $penjualanMaterial = Sale::whereMonth('sale_date', $filterMonth)
-            ->whereYear('sale_date', $filterYear)
-            ->whereHas('items.item', function ($query) use ($materialCategoryIds) {
-                $query->whereIn('category_id', $materialCategoryIds);
-            })
-            ->sum('grand_total');
+        $penjualanBersihMaterial = $penjualanKotorMaterial - $returPenjualanMaterial;
+        $penjualanBersihKeramik = $penjualanKotorKeramik - $returPenjualanKeramik;
 
-        $penjualanKeramik = Sale::whereMonth('sale_date', $filterMonth)
-            ->whereYear('sale_date', $filterYear)
-            ->whereHas('items.item', function ($query) use ($keramikCategoryIds) {
-                $query->whereIn('category_id', $keramikCategoryIds);
-            })
-            ->sum('grand_total');
+        $pembelianKotorMaterial = PembelianItem::whereHas('pembelian', fn($q) => $q->whereMonth('purchase_date', $filterMonth)->whereYear('purchase_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal');
+        $pembelianKotorKeramik = PembelianItem::whereHas('pembelian', fn($q) => $q->whereMonth('purchase_date', $filterMonth)->whereYear('purchase_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal');
+        
+        $returPembelianMaterial = ReturPembelianItem::whereHas('returPembelian', fn($q) => $q->whereMonth('retur_date', $filterMonth)->whereYear('retur_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['material']))->sum('subtotal_returned');
+        $returPembelianKeramik = ReturPembelianItem::whereHas('returPembelian', fn($q) => $q->whereMonth('retur_date', $filterMonth)->whereYear('retur_date', $filterYear))
+            ->whereHas('item', fn($q) => $q->whereIn('category_id', $categoryIds['keramik']))->sum('subtotal_returned');
 
-        $totalPendapatan = $penjualanMaterial + $penjualanKeramik;
+        $pembelianBersihMaterial = $pembelianKotorMaterial - $returPembelianMaterial;
+        $pembelianBersihKeramik = $pembelianKotorKeramik - $returPembelianKeramik;
 
-        $pembelianMaterial = Pembelian::whereMonth('purchase_date', $filterMonth)
-            ->whereYear('purchase_date', $filterYear)
-            ->whereHas('items.item', function ($query) use ($materialCategoryIds) {
-                $query->whereIn('item_id', function ($subQuery) use ($materialCategoryIds) {
-                    $subQuery->select('id')->from('items')->whereIn('category_id', $materialCategoryIds);
-                });
-            })
-            ->sum('total_amount');
+        $labaKotorMaterial = $penjualanBersihMaterial - $pembelianBersihMaterial;
+        $labaKotorKeramik = $penjualanBersihKeramik - $pembelianBersihKeramik;
+        
+        $totalPendapatanBersih = $penjualanBersihMaterial + $penjualanBersihKeramik;
+        $totalHpp = $pembelianBersihMaterial + $pembelianBersihKeramik;
+        $totalLabaKotor = $labaKotorMaterial + $labaKotorKeramik;
 
-        $pembelianKeramik = Pembelian::whereMonth('purchase_date', $filterMonth)
-            ->whereYear('purchase_date', $filterYear)
-            ->whereHas('items.item', function ($query) use ($keramikCategoryIds) {
-                $query->whereIn('item_id', function ($subQuery) use ($keramikCategoryIds) {
-                    $subQuery->select('id')->from('items')->whereIn('category_id', $keramikCategoryIds);
-                });
-            })
-            ->sum('total_amount');
+        $data = compact(
+        'filterMonth', 'filterYear',
+        'penjualanKotorMaterial', 'penjualanKotorKeramik',
+        'returPenjualanMaterial', 'returPenjualanKeramik',
+        'penjualanBersihMaterial', 'penjualanBersihKeramik', 'totalPendapatanBersih',
+        'pembelianKotorMaterial', 'pembelianKotorKeramik',
+        'returPembelianMaterial', 'returPembelianKeramik',
+        'pembelianBersihMaterial', 'pembelianBersihKeramik', 'totalHpp',
+        'labaKotorMaterial', 'labaKotorKeramik', 'totalLabaKotor'
+    );
 
-        $totalBiayaPembelian = $pembelianMaterial + $pembelianKeramik;
-
-        $labaRugiMaterial = $penjualanMaterial - $pembelianMaterial;
-        $labaRugiKeramik = $penjualanKeramik - $pembelianKeramik;
-        $totalLabaRugi = $labaRugiMaterial + $labaRugiKeramik;
-
-        return view('reports.print.profit_loss', compact(
-            'filterMonth',
-            'filterYear',
-            'penjualanMaterial',
-            'penjualanKeramik',
-            'totalPendapatan',
-            'pembelianMaterial',
-            'pembelianKeramik',
-            'totalBiayaPembelian',
-            'labaRugiMaterial',
-            'labaRugiKeramik',
-            'totalLabaRugi'
-        ));
-    }
+    $pdf = Pdf::loadView('reports.print.profit_loss', $data);
+    return $pdf->stream('laporan-laba-rugi-' . $filterYear . '-' . $filterMonth . '.pdf');
+}
 }

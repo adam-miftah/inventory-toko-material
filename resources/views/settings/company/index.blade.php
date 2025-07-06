@@ -34,8 +34,8 @@
           <div class="d-flex">
           <i class="fas fa-map-marker-alt fa-fw me-3 mt-1 text-muted"></i>
           <div>
-            <span class="fw-semibold">Alamat</span>
-            <p class="mb-0">{{ $company->address ?? '-' }}</p>
+            <span class="fw-semibold ms-1">Alamat</span>
+            <p class="mb-0 ms-2">{{ $company->address ?? '-' }}</p>
           </div>
           </div>
         </div>

@@ -1,120 +1,167 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cetak Laporan Penjualan Bulanan</title>
   <style>
+    /* Menggunakan gaya yang sama dengan laporan harian untuk konsistensi */
     body {
-      font-family: sans-serif;
-      font-size: 10pt;
-    }
-
-    h1,
-    h2,
-    h3 {
-      text-align: center;
+      font-family: 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
+      font-size: 9pt;
+      color: #333;
     }
 
     .container {
-      width: 80%;
+      width: 100%;
       margin: 0 auto;
     }
 
-    .table {
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 18pt;
+    }
+
+    .header p {
+      margin: 5px 0;
+      font-size: 12pt;
+    }
+
+    .summary-table,
+    .details-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-bottom: 25px;
     }
 
-    .table th,
-    .table td {
+    .summary-table td,
+    .details-table th,
+    .details-table td {
       border: 1px solid #ddd;
       padding: 8px;
-      text-align: left;
+      word-break: break-word;
     }
 
-    .table th {
+    .details-table th {
       background-color: #f2f2f2;
+      font-weight: bold;
+      text-align: left;
+      font-size: 8pt;
+      text-transform: uppercase;
+    }
+
+    .summary-table td:first-child {
+      font-weight: bold;
+      width: 70%;
     }
 
     .text-right {
       text-align: right;
     }
 
+    .text-center {
+      text-align: center;
+    }
+
     .fw-bold {
       font-weight: bold;
+    }
+
+    .total-row {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+
+    .section-title {
+      font-size: 14pt;
+      font-weight: bold;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #333;
+      padding-bottom: 5px;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      font-style: italic;
+      color: #777;
     }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <h1>Laporan Penjualan Bulanan per Kategori</h1>
-    <h2>Periode: {{ date('F', mktime(0, 0, 0, $filterMonth ?? now()->month, 1)) }} {{ $filterYear ?? now()->year }}</h2>
+    @php
+    $periode = \Carbon\Carbon::createFromDate($filterYear, $filterMonth, 1);
+  @endphp
+    <div class="header">
+      <h1>Laporan Penjualan Bulanan</h1>
+      <p>Periode: {{ $periode->isoFormat('MMMM YYYY') }}</p>
+    </div>
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Kategori</th>
-          <th>Total Penjualan</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Material (Cat)</td>
-          <td>Rp {{ number_format($monthlySalesMaterial ?? 0, 0, ',', '.') }}</td>
-        </tr>
-        <tr>
-          <td>Keramik</td>
-          <td>Rp {{ number_format($monthlySalesKeramik ?? 0, 0, ',', '.') }}</td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <th class="text-right">Total Penjualan Keseluruhan</th>
-          <th class="fw-bold">Rp {{ number_format($totalMonthlySales ?? 0, 0, ',', '.') }}</th>
-        </tr>
-      </tfoot>
+    <div class="section-title">Ringkasan Keuangan Bulanan</div>
+    <table class="summary-table">
+      <tr>
+        <td>Penjualan Bersih Material</td>
+        <td class="text-right fw-bold">Rp {{ number_format($netSalesMaterial ?? 0, 0, ',', '.') }}</td>
+      </tr>
+      <tr>
+        <td>Penjualan Bersih Keramik</td>
+        <td class="text-right fw-bold">Rp {{ number_format($netSalesKeramik ?? 0, 0, ',', '.') }}</td>
+      </tr>
+      <tr>
+        <td>Total Retur Bulan Ini</td>
+        <td class="text-right fw-bold">Rp {{ number_format($totalMonthlyReturns ?? 0, 0, ',', '.') }}</td>
+      </tr>
+      <tr class="total-row">
+        <td>TOTAL PENJUALAN BERSIH (KESELURUHAN)</td>
+        <td class="text-right fw-bold">Rp {{ number_format($totalNetMonthlySales ?? 0, 0, ',', '.') }}</td>
+      </tr>
     </table>
 
-    <h3>Detail Transaksi Penjualan</h3>
+    <div class="section-title">Detail Transaksi</div>
     @if ($salesThisMonth && $salesThisMonth->count() > 0)
-    <table class="table">
+    <table class="details-table">
       <thead>
       <tr>
-        <th>No</th>
+        <th class="text-center" style="width: 5%;">No</th>
         <th>Invoice</th>
-        <th>Tanggal</th>
+        <th style="width: 12%;">Tanggal</th>
         <th>Pelanggan</th>
-        <th>Kategori</th>
-        <th>Total</th>
+        <th>Kasir</th>
+        <th style="width: 30%;">Nama Item</th>
+        <th class="text-center" style="width: 10%;">Jml Item</th>
+        <th class="text-right">Total Transaksi</th>
       </tr>
       </thead>
       <tbody>
-      @foreach ($salesThisMonth as $key => $sale)
-      @foreach ($sale->items as $saleItem)
+      @foreach ($salesThisMonth as $sale)
       <tr>
-      <td>{{ $loop->parent->iteration }}.{{ $loop->iteration }}</td>
-      <td>{{ $sale->invoice_number }}</td>
-      <td>{{ $sale->sale_date->format('d-m-Y H:i') }}</td>
-      <td>{{ $sale->customer_name ?? '-' }}</td>
-      <td>{{ $saleItem->item->category->name ?? '-' }}</td>
-      <td>Rp {{ number_format($saleItem->quantity * $saleItem->unit_price, 0, ',', '.') }}</td>
-      </tr>
-      @endforeach
-      <tr class="fw-bold">
-        <td colspan="5" class="text-right">Total Transaksi {{ $sale->invoice_number }}:</td>
-        <td>Rp {{ number_format($sale->grand_total, 0, ',', '.') }}</td>
+      <td class="text-center">{{ $loop->iteration }}</td>
+      <td class="fw-bold">{{ $sale->invoice_number }}</td>
+      <td>{{ $sale->sale_date->format('d-m-Y') }}</td>
+      <td>{{ $sale->customer_name ?? 'Umum' }}</td>
+      <td>{{ $sale->user->name }}</td>
+      <td>
+      {{ $sale->items->pluck('item.name')->join(', ') }}
+      </td>
+      <td class="text-center">{{ $sale->items->sum('quantity') }}</td>
+      <td class="text-right fw-bold">Rp {{ number_format($sale->grand_total, 0, ',', '.') }}</td>
       </tr>
     @endforeach
       </tbody>
     </table>
   @else
-    <p>Tidak ada transaksi penjualan pada bulan {{ date('F', mktime(0, 0, 0, $filterMonth ?? now()->month, 1)) }}
-      {{ $filterYear ?? now()->year }}.
-    </p>
+    <div class="no-data">
+      <p>Tidak ada transaksi penjualan pada periode {{ $periode->isoFormat('MMMM YYYY') }}.</p>
+    </div>
   @endif
   </div>
 </body>

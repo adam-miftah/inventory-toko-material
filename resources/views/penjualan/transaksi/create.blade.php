@@ -11,7 +11,7 @@
       <p class="mb-0 text-muted" style="font-size: 0.8rem">Buat transaksi penjualan baru untuk pelanggan</p>
     </div>
     <div>
-      <a href="{{ route('penjualan.transaksi.index') }}" class="btn btn-outline-secondary btn-sm">
+      <a href="{{ route('penjualan.transaksi.index') }}" class="btn btn-secondary btn-sm">
       <i class="fas fa-arrow-left me-2"></i> Kembali
       </a>
     </div>
@@ -198,7 +198,7 @@
       <button type="submit" class="btn btn-success btn-sm px-4" id="process-sale-btn">
       <i class="fas fa-check-circle me-2"></i> Proses Penjualan
       </button>
-      <button type="reset" class="btn btn-outline-secondary btn-sm px-4">
+      <button type="reset" class="btn btn-secondary btn-sm px-4">
       <i class="fas fa-undo me-2"></i> Reset
       </button>
     </div>

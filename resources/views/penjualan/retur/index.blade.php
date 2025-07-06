@@ -86,15 +86,15 @@
         </td>
         <td data-label="Aksi" class="text-center">
         <div class="d-flex justify-content-center gap-2">
-        <a href="{{ route('penjualan.retur.show', $return) }}"
-        class="btn btn-sm btn-outline-info rounded-circle" data-bs-toggle="tooltip" title="Detail">
+        <a href="{{ route('penjualan.retur.show', $return) }}" class="btn btn-sm btn-info rounded-circle"
+        data-bs-toggle="tooltip" title="Detail">
         <i class="fas fa-eye"></i>
         </a>
-        <button type="button" class="btn btn-sm btn-outline-danger rounded-circle delete-btn"
+        {{-- <button type="button" class="btn btn-sm btn-outline-danger rounded-circle delete-btn"
         data-url="{{ route('penjualan.retur.destroy', $return) }}" data-name="{{ $return->return_number }}"
         data-bs-toggle="tooltip" title="Hapus">
         <i class="fas fa-trash-alt"></i>
-        </button>
+        </button> --}}
         </div>
         </td>
       </tr>

@@ -137,7 +137,7 @@
                                                     </div>
                                                 </td>
                                                 <td class="text-end pe-3">
-                                                    <button type="button" class="btn btn-sm btn-outline-danger remove-item"><i
+                                                    <button type="button" class="btn btn-sm btn-danger remove-item"><i
                                                             class="fas fa-trash-alt"></i></button>
                                                 </td>
                                             </tr>
@@ -175,7 +175,7 @@
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Simpan
                                     Pembelian</button>
-                                <a href="{{ route('pembelian.index') }}" class="btn btn-outline-secondary">Batal</a>
+                                <a href="{{ route('pembelian.index') }}" class="btn btn-secondary">Batal</a>
                             </div>
                         </div>
                     </div>
@@ -278,28 +278,28 @@
                 itemCount++;
                 // PERUBAHAN: Template baru menggunakan <tr>
                 const newItemHtml = `
-                    <tr class="purchase-item-row">
-                        <td class="ps-3">
-                            <select class="form-select form-select-sm item-select" name="items[${itemCount}][item_id]" required>
-                                <option value="">Cari atau Pilih Produk</option>
-                                @foreach ($items as $item)
-                                    <option value="{{ $item->id }}" data-price="{{ $item->purchase_price }}">{{ $item->name }}</option>
-                                @endforeach
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control form-control-sm quantity-input" name="items[${itemCount}][quantity]" value="1" min="1" required>
-                        </td>
-                        <td>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text">Rp</span>
-                                <input type="number" class="form-control price-input" name="items[${itemCount}][price]" value="0" min="0" required>
-                            </div>
-                        </td>
-                        <td class="text-end pe-3">
-                            <button type="button" class="btn btn-sm btn-outline-danger remove-item"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                    </tr>`;
+                                <tr class="purchase-item-row">
+                                    <td class="ps-3">
+                                        <select class="form-select form-select-sm item-select" name="items[${itemCount}][item_id]" required>
+                                            <option value="">Cari atau Pilih Produk</option>
+                                            @foreach ($items as $item)
+                                                <option value="{{ $item->id }}" data-price="{{ $item->purchase_price }}">{{ $item->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm quantity-input" name="items[${itemCount}][quantity]" value="1" min="1" required>
+                                    </td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">Rp</span>
+                                            <input type="number" class="form-control price-input" name="items[${itemCount}][price]" value="0" min="0" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <button type="button" class="btn btn-sm btn-danger remove-item"><i class="fas fa-trash-alt"></i></button>
+                                    </td>
+                                </tr>`;
 
                 $('#purchase-items-container').append(newItemHtml);
                 initializeSelect2($('select[name="items[${itemCount}][item_id]"]'));

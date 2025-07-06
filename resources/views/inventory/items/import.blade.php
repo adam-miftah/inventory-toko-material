@@ -8,7 +8,7 @@
     <h4 class="mb-0">
       <i class="fas fa-file-excel text-primary me-2"></i>Import Data Barang
     </h4>
-    <a href="{{ route('inventory.items') }}" class="btn btn-outline-secondary btn-sm">
+    <a href="{{ route('inventory.items') }}" class="btn btn-secondary btn-sm">
       <i class="fas fa-arrow-left me-1"></i> Kembali
     </a>
     </div>

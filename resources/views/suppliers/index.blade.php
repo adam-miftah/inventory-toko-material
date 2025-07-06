@@ -71,11 +71,11 @@
         </td>
         <td data-label="Aksi" class="text-center">
         <div class="d-flex justify-content-center gap-2">
-        <a href="{{ route('suppliers.show', $supplier) }}" class="btn btn-sm btn-outline-info"
+        <a href="{{ route('suppliers.show', $supplier) }}" class="btn btn-sm btn-info"
         data-bs-toggle="tooltip" title="Detail"><i class="fas fa-eye"></i></a>
-        <a href="{{ route('suppliers.edit', $supplier) }}" class="btn btn-sm btn-outline-warning"
+        <a href="{{ route('suppliers.edit', $supplier) }}" class="btn btn-sm btn-warning"
         data-bs-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
-        <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
+        <button type="button" class="btn btn-sm btn-danger delete-btn"
         data-url="{{ route('suppliers.destroy', $supplier) }}" data-name="{{ $supplier->name }}"
         data-bs-toggle="tooltip" title="Hapus">
         <i class="fas fa-trash-alt"></i>

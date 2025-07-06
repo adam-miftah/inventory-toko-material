@@ -86,7 +86,7 @@
 
       {{-- Tombol Aksi --}}
       <div class="d-flex justify-content-end mt-4">
-        <a href="{{ route('suppliers.show', $supplier) }}" class="btn btn-outline-secondary me-2">Batal</a>
+        <a href="{{ route('suppliers.show', $supplier) }}" class="btn btn-secondary me-2">Batal</a>
         <button type="submit" class="btn btn-primary">
         <i class="fas fa-save me-2"></i>Update Supplier
         </button>

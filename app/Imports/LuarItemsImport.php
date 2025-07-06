@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 
-class LuarItemsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure
+class LuarItemsImport implements ToModel, WithHeadingRow, WithValidation
 {
     use SkipsFailures;
 

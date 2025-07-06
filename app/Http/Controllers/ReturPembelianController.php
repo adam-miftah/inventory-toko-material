@@ -34,7 +34,7 @@ public function store(Request $request)
             'items' => 'required|array|min:1',
             'items.*.pembelian_item_id' => 'required|exists:pembelian_items,id',
             'items.*.item_id' => 'required|exists:items,id',
-            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.quantity' => 'required|integer|min:0', 
             'items.*.unit_price' => 'required|numeric|min:0',
         ]);
 
@@ -60,23 +60,26 @@ public function store(Request $request)
 
             $totalReturnedAmount = 0;
             foreach ($request->input('items') as $itemData) {
-                $subtotalReturned = $itemData['quantity'] * $itemData['unit_price'];
-                $totalReturnedAmount += $subtotalReturned;
+                // Tambahkan kondisi ini untuk melewati item yang tidak diretur
+                if ($itemData['quantity'] > 0) { 
+                    $subtotalReturned = $itemData['quantity'] * $itemData['unit_price'];
+                    $totalReturnedAmount += $subtotalReturned;
 
-                $pembelianItem = PembelianItem::findOrFail($itemData['pembelian_item_id']);
+                    $pembelianItem = PembelianItem::findOrFail($itemData['pembelian_item_id']);
 
-                ReturPembelianItem::create([
-                    'retur_pembelian_id' => $returPembelian->id,
-                    'pembelian_item_id' => $itemData['pembelian_item_id'],
-                    'item_id' => $itemData['item_id'],
-                    'item_name' => $pembelianItem->item_name,
-                    'quantity' => $itemData['quantity'],
-                    'unit_price' => $itemData['unit_price'],
-                    'subtotal_returned' => $subtotalReturned,
-                ]);
+                    ReturPembelianItem::create([
+                        'retur_pembelian_id' => $returPembelian->id,
+                        'pembelian_item_id' => $itemData['pembelian_item_id'],
+                        'item_id' => $itemData['item_id'],
+                        'item_name' => $pembelianItem->item_name,
+                        'quantity' => $itemData['quantity'],
+                        'unit_price' => $itemData['unit_price'],
+                        'subtotal_returned' => $subtotalReturned,
+                    ]);
 
-                // Kurangi stok barang
-                $pembelianItem->item->decrement('stock', $itemData['quantity']);
+                    // Kurangi stok barang
+                    $pembelianItem->item->decrement('stock', $itemData['quantity']);
+                }
             }
 
             // ======================================================

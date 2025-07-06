@@ -108,17 +108,16 @@
                                             <td class="text-center" data-label="Aksi">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="{{ route('inventory.items.show', $item->id) }}"
-                                                        class="btn btn-sm btn-outline-info rounded-circle"
-                                                        data-bs-toggle="tooltip" title="Detail"><i class="fas fa-eye"></i></a>
+                                                        class="btn btn-sm btn-info " data-bs-toggle="tooltip" title="Detail"><i
+                                                            class="fas fa-eye"></i></a>
                                                     <a href="{{ route('inventory.items.edit', $item->id) }}"
-                                                        class="btn btn-sm btn-outline-warning rounded-circle"
-                                                        data-bs-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
+                                                        class="btn btn-sm btn-warning " data-bs-toggle="tooltip" title="Edit"><i
+                                                            class="fas fa-edit"></i></a>
                                                     <form action="{{ route('inventory.items.destroy', $item->id) }}"
                                                         method="POST" class="d-inline delete-form">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="button"
-                                                            class="btn btn-sm btn-outline-danger rounded-circle delete-btn"
+                                                        <button type="button" class="btn btn-sm btn-danger  delete-btn"
                                                             data-item-name="{{ $item->name }}" data-bs-toggle="tooltip"
                                                             title="Hapus">
                                                             <i class="fas fa-trash-alt"></i>
@@ -183,17 +182,16 @@
                                             <td class="text-center" data-label="Aksi">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="{{ route('inventory.items.show', $item->id) }}"
-                                                        class="btn btn-sm btn-outline-info rounded-circle"
-                                                        data-bs-toggle="tooltip" title="Detail"><i class="fas fa-eye"></i></a>
+                                                        class="btn btn-sm btn-info " data-bs-toggle="tooltip" title="Detail"><i
+                                                            class="fas fa-eye"></i></a>
                                                     <a href="{{ route('inventory.items.edit', $item->id) }}"
-                                                        class="btn btn-sm btn-outline-warning rounded-circle"
-                                                        data-bs-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
+                                                        class="btn btn-sm btn-warning " data-bs-toggle="tooltip" title="Edit"><i
+                                                            class="fas fa-edit"></i></a>
                                                     <form action="{{ route('inventory.items.destroy', $item->id) }}"
                                                         method="POST" class="d-inline delete-form">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="button"
-                                                            class="btn btn-sm btn-outline-danger rounded-circle delete-btn"
+                                                        <button type="button" class="btn btn-sm btn-danger  delete-btn"
                                                             data-item-name="{{ $item->name }}" data-bs-toggle="tooltip"
                                                             title="Hapus">
                                                             <i class="fas fa-trash-alt"></i>
@@ -251,17 +249,16 @@
                                             <td class="text-center" data-label="Aksi">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="{{ route('inventory.items.show', $item->id) }}"
-                                                        class="btn btn-sm btn-outline-info rounded-circle"
-                                                        data-bs-toggle="tooltip" title="Detail"><i class="fas fa-eye"></i></a>
+                                                        class="btn btn-sm btn-info " data-bs-toggle="tooltip" title="Detail"><i
+                                                            class="fas fa-eye"></i></a>
                                                     <a href="{{ route('inventory.items.edit', $item->id) }}"
-                                                        class="btn btn-sm btn-outline-warning rounded-circle"
-                                                        data-bs-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
+                                                        class="btn btn-sm btn-warning " data-bs-toggle="tooltip" title="Edit"><i
+                                                            class="fas fa-edit"></i></a>
                                                     <form action="{{ route('inventory.items.destroy', $item->id) }}"
                                                         method="POST" class="d-inline delete-form">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="button"
-                                                            class="btn btn-sm btn-outline-danger rounded-circle delete-btn"
+                                                        <button type="button" class="btn btn-sm btn-danger  delete-btn"
                                                             data-item-name="{{ $item->name }}" data-bs-toggle="tooltip"
                                                             title="Hapus">
                                                             <i class="fas fa-trash-alt"></i>
@@ -317,17 +314,16 @@
                                             <td class="text-center" data-label="Aksi">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="{{ route('inventory.items.show', $item->id) }}"
-                                                        class="btn btn-sm btn-outline-info rounded-circle"
-                                                        data-bs-toggle="tooltip" title="Detail"><i class="fas fa-eye"></i></a>
+                                                        class="btn btn-sm btn-info " data-bs-toggle="tooltip" title="Detail"><i
+                                                            class="fas fa-eye"></i></a>
                                                     <a href="{{ route('inventory.items.edit', $item->id) }}"
-                                                        class="btn btn-sm btn-outline-warning rounded-circle"
-                                                        data-bs-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
+                                                        class="btn btn-sm btn-warning " data-bs-toggle="tooltip" title="Edit"><i
+                                                            class="fas fa-edit"></i></a>
                                                     <form action="{{ route('inventory.items.destroy', $item->id) }}"
                                                         method="POST" class="d-inline delete-form">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="button"
-                                                            class="btn btn-sm btn-outline-danger rounded-circle delete-btn"
+                                                        <button type="button" class="btn btn-sm btn-danger  delete-btn"
                                                             data-item-name="{{ $item->name }}" data-bs-toggle="tooltip"
                                                             title="Hapus">
                                                             <i class="fas fa-trash-alt"></i>

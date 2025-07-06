@@ -105,7 +105,7 @@
         <div class="card-footer bg-white p-3">
         <div class="d-grid gap-2">
           <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Simpan Retur</button>
-          <a href="{{ route('retur-pembelian.index') }}" class="btn btn-outline-secondary">Batal</a>
+          <a href="{{ route('retur-pembelian.index') }}" class="btn btn-secondary">Batal</a>
         </div>
         </div>
       </div>
@@ -206,20 +206,25 @@
         items.forEach(function (item, index) {
           // PERUBAHAN: Template baru menggunakan <tr>
           const itemHtml = `
-        <tr class="retur-item-row">
-        <td class="ps-3">
+     <tr class="retur-item-row">
+      <td class="ps-3">
+        {{-- INI YANG DITAMBAHKAN --}}
+        <input type="hidden" name="items[${index}][pembelian_item_id]" value="${item.id}">
+
         <input type="hidden" name="items[${index}][item_id]" value="${item.item_id}">
         <span class="fw-semibold">${item.item_name}</span>
-        </td>
-        <td class="text-center">${item.quantity}</td>
-        <td>
-        <input type="number" class="form-control form-control-sm quantity-input" name="items[${index}][quantity]" value="0" min="0" max="${item.quantity}" required>
-        <input type="hidden" class="price-input" name="items[${index}][price]" value="${item.unit_price}">
-        </td>
-        <td class="text-end pe-3">
+      </td>
+      <td class="text-center">${item.quantity}</td>
+      <td>
+        <input type="number" class="form-control form-control-sm quantity-input" name="items[${index}][quantity]" value="0" min="0" max="${item.quantity}">
+
+        {{-- NAMA INPUT INI DIPERBAIKI --}}
+        <input type="hidden" class="price-input" name="items[${index}][unit_price]" value="${item.unit_price}">
+      </td>
+      <td class="text-end pe-3">
         Rp ${parseFloat(item.unit_price).toLocaleString('id-ID')}
-        </td>
-        </tr>`;
+      </td>
+    </tr>`;
           container.append(itemHtml);
         });
         } else {

@@ -71,7 +71,7 @@
         $icon = 'fa-border-style';
         if ($category->type === 'luar')
         $icon = 'fa-shipping-fast';
-        @endphp
+      @endphp
           <div class="icon-circle me-3">
           <i class="fas {{ $icon }}"></i>
           </div>
@@ -87,7 +87,7 @@
         $badgeClass = 'warning';
         if ($category->type === 'luar')
         $badgeClass = 'primary';
-        @endphp
+      @endphp
         <span
           class="badge bg-{{$badgeClass}}-subtle text-{{$badgeClass}}-emphasis border border-{{$badgeClass}}-subtle">
           {{ Str::title($category->type) }}
@@ -95,11 +95,11 @@
         </td>
         <td data-label="Aksi" class="text-center">
         <div class="d-flex justify-content-center gap-2">
-          <a href="{{ route('inventory.categories.edit', $category) }}" class="btn btn-sm btn-outline-warning"
+          <a href="{{ route('inventory.categories.edit', $category) }}" class="btn btn-sm btn-warning"
           data-bs-toggle="tooltip" title="Edit">
           <i class="fas fa-edit"></i>
           </a>
-          <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
+          <button type="button" class="btn btn-sm btn-danger delete-btn"
           data-form-id="delete-form-{{ $category->id }}" data-category-name="{{ $category->name }}"
           data-bs-toggle="tooltip" title="Hapus">
           <i class="fas fa-trash-alt"></i>

@@ -122,7 +122,7 @@
       </div>
       @if($allItems->count() > 10)
       <div class="card-footer bg-white text-center">
-      <a href="#" class="btn btn-sm btn-outline-primary">Lihat Semua Riwayat</a>
+      <a href="#" class="btn btn-sm btn-primary">Lihat Semua Riwayat</a>
       </div>
     @endif
       </div>
