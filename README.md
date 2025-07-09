@@ -87,18 +87,6 @@ Untuk menjalankan project ini secara lokal, ikuti langkah-langkah berikut:
 
 ---
 
-### 🤝 Kontribusi
-
-Kami menyambut kontribusi Anda! Jika Anda ingin berkontribusi pada project ini, silakan ikuti langkah-langkah berikut:
-
-1.  Fork repository ini.
-2.  Buat branch baru untuk fitur Anda (`git checkout -b fitur/nama-fitur`).
-3.  Lakukan commit perubahan Anda (`git commit -m 'Tambahkan fitur baru'`).
-4.  Push ke branch Anda (`git push origin fitur/nama-fitur`).
-5.  Buat Pull Request (PR) ke branch `main` repository ini.
-
----
-
 ### 📄 Lisensi
 
 Project ini dilisensikan di bawah [Lisensi MIT](https://opensource.org/licenses/MIT).
