@@ -105,11 +105,9 @@ Project ini dilisensikan di bawah [Lisensi MIT](https://opensource.org/licenses/
 
 ---
 
-### Kontak
-
-Jika Anda memiliki pertanyaan atau masukan, jangan ragu untuk menghubungi:
-
-* **Adam Miftah** - [adammiftah190@gmail.com]
+## 📧 **Kontak**
+Jika ada pertanyaan lebih lanjut, silakan hubungi melalui:  
+- **Email:** adammiftah196@gmail.com  
 
 ---
 
